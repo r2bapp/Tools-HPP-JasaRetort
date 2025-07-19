@@ -1,39 +1,32 @@
-# 💼 HPP Jasa Kemas & Pengawetan Retort
+# 💼 Tools HPP Jasa Kemasan dan Pengawetan Retort
 
-Aplikasi berbasis web (dibangun dengan Streamlit) untuk membantu pelaku usaha jasa retort menghitung Harga Pokok Produksi (HPP) secara akurat dan cepat, serta menentukan harga jual berdasarkan berbagai parameter yang dapat disesuaikan.
-
-## 🧠 Fitur Utama
-
-✅ Perhitungan HPP berdasarkan:
-- Jenis dan ukuran **kemasan** (retort bag & standing pouch)
-- Konsumsi **gas**, **listrik**, dan **air**
-- Penambahan **biaya sewa bangunan**
-- Perhitungan otomatis **pajak 0,5%**
-- **Margin keuntungan** dapat disesuaikan
-- Estimasi berbasis **kapasitas mesin retort 50 liter**
-- **Kuantitas proses min 15 pcs dan maks 100 pcs**
-
-✅ Opsi input:
-- Kemasan preset atau custom (ukuran & harga manual)
-- Margin & sewa bangunan bisa diatur bebas
-
-✅ Hasil:
-- Ditampilkan secara rapi di dashboard
-- Bisa diunduh dalam bentuk **CSV** & **PDF**
-
-✅ Keamanan:
-- Akses hanya untuk email terdaftar: `rumahretortbersama1@gmail.com`
-
-✅ Tampilan:
-- Clean, minimalis & edukatif
-- Branding warna R2B: biru navy & kuning tua
+Aplikasi berbasis Streamlit untuk menghitung Harga Pokok Produksi (HPP) jasa kemasan dan pengawetan produk menggunakan teknologi retort. Dikembangkan khusus untuk UMKM pangan agar lebih mudah memahami struktur biaya dan menentukan harga jual produk.
 
 ---
 
-## 📦 Cara Menjalankan Aplikasi
+## 🎯 Fitur Utama
 
-1. Clone repo ini:
+- 🔐 Login pengguna (hanya email terotorisasi: `rumahretortbersama1@gmail.com`)
+- 📦 Input data jenis dan ukuran kemasan (retort & standing pouch atau custom)
+- ⚡ Kalkulasi biaya energi (listrik, gas, air), sewa, pajak, dan margin keuntungan
+- 📊 Tampilan hasil HPP interaktif (biaya total, HPP per pcs, harga jual)
+- 💾 Simpan hasil perhitungan ke file CSV
+- 📄 Export laporan ke PDF
+- 🔄 Tombol Reset untuk memulai perhitungan baru
+- 🎨 UI minimalis modern dengan warna branding navy dan kuning khas R2B
+
+---
+
+## 📸 Tampilan
+
+![Tampilan Aplikasi](https://github.com/r2bapp/Tools-HPP-JasaRetort/assets/preview.jpg)
+
+---
+
+## 🚀 Cara Menjalankan Secara Lokal
+
+### 1. Clone Repository
 
 ```bash
-git clone https://github.com/namamu/repo-hpp-retort.git
-cd repo-hpp-retort
+git clone https://github.com/r2bapp/Tools-HPP-JasaRetort.git
+cd Tools-HPP-JasaRetort
