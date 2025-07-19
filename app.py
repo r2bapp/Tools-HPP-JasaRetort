@@ -147,7 +147,6 @@ if st.button("📄 Export ke PDF"):
 # RESET
 # ----------------------------
 if st.button("🔄 Reset Data"):
-    for key in st.session_state.keys():
+    for key in list(st.session_state.keys()):
         del st.session_state[key]
- st.rerun()
-
+    st.rerun()
