@@ -149,4 +149,5 @@ if st.button("📄 Export ke PDF"):
 if st.button("🔄 Reset Data"):
     for key in st.session_state.keys():
         del st.session_state[key]
-    st.experimental_rerun()
+ st.rerun()
+
