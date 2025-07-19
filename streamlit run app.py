@@ -1,2 +1,2 @@
-pip install streamlit pandas
+pip install streamlit pandas fpdf
 streamlit run app.py
