@@ -1,4 +1,4 @@
-# app.py
+# Final app.py
 import streamlit as st
 import pandas as pd
 from fpdf import FPDF
@@ -14,6 +14,12 @@ if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
 
 if not st.session_state.logged_in:
+    st.markdown("""
+        <style>
+        .main { background-color: #f2f6fa; }
+        </style>
+    """, unsafe_allow_html=True)
+
     st.title("🔐 Login Pengguna")
     email = st.text_input("Masukkan email terdaftar")
     if st.button("Login"):
@@ -49,9 +55,11 @@ kemasan_data = {
 }
 
 # ----------------------------
-# SIDEBAR & INPUT
+# SIDEBAR INPUT
 # ----------------------------
-st.sidebar.title("📊 Input Data HPP")
+st.sidebar.image("https://raw.githubusercontent.com/r2bapp/assets/main/logo-r2b.png", width=200)
+st.sidebar.markdown("### 📊 Input Data HPP")
+
 jenis_kemasan = st.sidebar.selectbox("Jenis Kemasan", list(kemasan_data.keys()) + ["Custom"])
 
 if jenis_kemasan != "Custom":
@@ -74,14 +82,13 @@ pemakaian_air_liter = 70
 harga_air_per_liter = 120000 / 500
 harga_air_per_proses = harga_air_per_liter * pemakaian_air_liter
 
-# Listrik dalam kWh
 def hitung_listrik():
     freezer = (140 / 1000) * 24
     vacuum = (120 / 1000) * 2
     sealer = (500 / 1000) * 2
     lampu = (4 * 25 / 1000) * 5.5
     total_kwh = freezer + vacuum + sealer + lampu
-    return total_kwh * 1500  # Asumsi tarif listrik per kWh
+    return total_kwh * 1500
 
 biaya_listrik = hitung_listrik()
 biaya_sewa_per_proses = biaya_sewa_bulanan / 30
@@ -93,20 +100,26 @@ biaya_total = (harga_kemasan * jumlah_kemasan) + harga_gas_per_proses + harga_ai
 pajak = biaya_total * 0.005
 harga_setelah_pajak = biaya_total + pajak
 harga_dengan_margin = harga_setelah_pajak * (1 + margin / 100)
-
 hpp_per_pcs = harga_dengan_margin / jumlah_kemasan
 
 # ----------------------------
-# TAMPILAN UTAMA
+# DASHBOARD UTAMA
 # ----------------------------
+st.markdown("""
+    <style>
+        .stMetric { background-color: #fefefe; border: 1px solid #ddd; border-radius: 10px; padding: 15px; }
+    </style>
+""", unsafe_allow_html=True)
+
 st.title("💼 HPP Jasa Kemasan dan Pengawetan Retort")
 
-st.metric("Total Biaya (Rp)", f"{biaya_total:,.0f}")
-st.metric("HPP per pcs (Rp)", f"{hpp_per_pcs:,.0f}")
-st.metric("Harga Jual Saran (Rp)", f"{hpp_per_pcs:,.0f}")
+col1, col2, col3 = st.columns(3)
+col1.metric("Total Biaya (Rp)", f"{biaya_total:,.0f}")
+col2.metric("HPP per pcs (Rp)", f"{hpp_per_pcs:,.0f}")
+col3.metric("Harga Jual Saran (Rp)", f"{hpp_per_pcs:,.0f}")
 
 # ----------------------------
-# SIMPAN DATA KE CSV
+# SIMPAN CSV
 # ----------------------------
 if st.button("💾 Simpan ke CSV"):
     data = pd.DataFrame({
@@ -130,21 +143,19 @@ if st.button("📄 Export ke PDF"):
     pdf.set_font("Arial", 'B', 16)
     pdf.cell(200, 10, "Laporan HPP Jasa Retort", ln=True, align='C')
     pdf.set_font("Arial", '', 12)
-
     pdf.ln(10)
     pdf.cell(200, 10, f"Ukuran Kemasan: {ukuran_kemasan}", ln=True)
     pdf.cell(200, 10, f"Jumlah: {jumlah_kemasan} pcs", ln=True)
     pdf.cell(200, 10, f"Total Biaya: Rp {biaya_total:,.0f}", ln=True)
     pdf.cell(200, 10, f"Pajak (0.5%): Rp {pajak:,.0f}", ln=True)
     pdf.cell(200, 10, f"Harga Jual per pcs: Rp {hpp_per_pcs:,.0f}", ln=True)
-
     file_path = f"/mnt/data/hasil_hpp.pdf"
     pdf.output(file_path)
     st.success("Berhasil diekspor ke PDF!")
     st.download_button("📥 Download PDF", file_name="hasil_hpp.pdf", mime="application/pdf", data=open(file_path, "rb").read())
 
 # ----------------------------
-# RESET
+# RESET APLIKASI
 # ----------------------------
 if st.button("🔄 Reset Data"):
     for key in list(st.session_state.keys()):
