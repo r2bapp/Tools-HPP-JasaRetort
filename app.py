@@ -1,45 +1,34 @@
-# HPP Retort Streamlit App (Rebuild based on latest specification)
-
+# app.py
 import streamlit as st
 import pandas as pd
 from fpdf import FPDF
+import datetime
 import os
 
-# ---------------------- SETUP ----------------------
-st.set_page_config(page_title="HPP Jasa Kemas dan Pengawetan Retort", layout="centered")
+# ----------------------------
+# KONFIGURASI LOGIN SEDERHANA
+# ----------------------------
+AUTHORIZED_EMAIL = "rumahretortbersama1@gmail.com"
 
-st.markdown("""
-<style>
-body { background-color: #F9FAFB; }
-.reportview-container .markdown-text-container {
-    font-family: 'Segoe UI', sans-serif;
-    color: #1F2937;
-}
-[data-testid="stSidebar"] > div:first-child {
-    background-color: #0D1B2A;
-    color: white;
-}
-</style>
-""", unsafe_allow_html=True)
+if 'logged_in' not in st.session_state:
+    st.session_state.logged_in = False
 
-# ---------------------- USER AUTH ----------------------
-if 'authenticated' not in st.session_state:
-    st.session_state.authenticated = False
-
-if not st.session_state.authenticated:
-    st.title("🔒 Login")
-    email = st.text_input("Masukkan Email Terdaftar")
+if not st.session_state.logged_in:
+    st.title("🔐 Login Pengguna")
+    email = st.text_input("Masukkan email terdaftar")
     if st.button("Login"):
-        if email.strip() == "rumahretortbersama1@gmail.com":
-            st.session_state.authenticated = True
-            st.experimental_rerun()
+        if email.strip().lower() == AUTHORIZED_EMAIL:
+            st.session_state.logged_in = True
+            st.success("Berhasil login!")
         else:
-            st.error("Email tidak terdaftar. Hubungi admin.")
+            st.error("Email tidak dikenali.")
     st.stop()
 
-# ---------------------- DATA ----------------------
+# ----------------------------
+# DATA KEMASAN
+# ----------------------------
 kemasan_data = {
-    "Retort Bag": {
+    "Bag Retort": {
         "8x9 cm": 630,
         "12x12 cm": 1390,
         "12x15 cm": 1400,
@@ -50,85 +39,114 @@ kemasan_data = {
         "16x23 cm": 2400,
         "17x25 cm": 3700,
         "25x34 cm": 5400,
-        "25x50 cm": 10500,
+        "25x50 cm": 10500
     },
     "Standing Pouch": {
         "12x16 cm": 1700,
-        "13x20.5 cm": 2100,
-        "16x29 cm": 4000,
+        "13x20,5 cm": 2100,
+        "16x29 cm": 4000
     }
 }
 
-# ---------------------- INPUT FORM ----------------------
-st.title("📊 HPP Jasa Kemas dan Pengawetan dengan Retort")
-st.markdown("### Input Data Produksi")
+# ----------------------------
+# SIDEBAR & INPUT
+# ----------------------------
+st.sidebar.title("📊 Input Data HPP")
+jenis_kemasan = st.sidebar.selectbox("Jenis Kemasan", list(kemasan_data.keys()) + ["Custom"])
 
-kemasan_type = st.selectbox("Jenis Kemasan", list(kemasan_data.keys()) + ["Custom"])
-
-if kemasan_type != "Custom":
-    ukuran = st.selectbox("Ukuran", list(kemasan_data[kemasan_type].keys()))
-    harga_kemasan = kemasan_data[kemasan_type][ukuran]
+if jenis_kemasan != "Custom":
+    ukuran_kemasan = st.sidebar.selectbox("Ukuran Kemasan", list(kemasan_data[jenis_kemasan].keys()))
+    harga_kemasan = kemasan_data[jenis_kemasan][ukuran_kemasan]
 else:
-    ukuran = st.text_input("Ukuran Custom")
-    harga_kemasan = st.number_input("Harga per Pcs (Rp)", min_value=0, step=100)
+    ukuran_kemasan = st.sidebar.text_input("Ukuran Custom (cth: 10x10 cm)")
+    harga_kemasan = st.sidebar.number_input("Harga Custom per pcs", min_value=100, value=1000)
 
-jumlah_produk = st.number_input("Jumlah Produk (pcs)", min_value=15, max_value=100, step=1, value=15)
+jumlah_kemasan = st.sidebar.number_input("Jumlah Produk Diproses", min_value=15, max_value=100, value=50)
+margin = st.sidebar.slider("Margin Keuntungan (%)", 0, 100, 20)
+biaya_sewa_bulanan = st.sidebar.number_input("Biaya Sewa per Bulan", min_value=0, value=1000000)
+periode_sewa_bulan = st.sidebar.slider("Periode Pembagian Biaya (bulan)", 1, 24, 12)
 
-margin = st.slider("Margin Keuntungan (%)", 0, 100, 30)
+# ----------------------------
+# PERHITUNGAN ENERGI & LAINNYA
+# ----------------------------
+harga_gas_per_proses = 23000 / 5
+pemakaian_air_liter = 70
+harga_air_per_liter = 120000 / 500
+harga_air_per_proses = harga_air_per_liter * pemakaian_air_liter
 
-# ---------------------- PERHITUNGAN HPP ----------------------
-if st.button("Hitung HPP"):
-    # Energi dan air per proses
-    gas = 23000 / 5
-    air = (120000 / 500) * 80
+# Listrik dalam kWh
+def hitung_listrik():
+    freezer = (140 / 1000) * 24
+    vacuum = (120 / 1000) * 2
+    sealer = (500 / 1000) * 2
+    lampu = (4 * 25 / 1000) * 5.5
+    total_kwh = freezer + vacuum + sealer + lampu
+    return total_kwh * 1500  # Asumsi tarif listrik per kWh
 
-    listrik_per_jam = ((140 + 120 + 500 + 4 * 25) / 1000) * 1.5 * 1500  # 1.5 jam rata-rata, Rp1500/kWh
+biaya_listrik = hitung_listrik()
+biaya_sewa_per_proses = biaya_sewa_bulanan / 30
 
-    total_biaya = (harga_kemasan * jumlah_produk) + gas + listrik_per_jam + air
-    pajak = total_biaya * 0.005
-    total_dengan_pajak = total_biaya + pajak
-    hpp_per_pcs = total_dengan_pajak / jumlah_produk
-    harga_jual = hpp_per_pcs * (1 + margin / 100)
+# ----------------------------
+# HITUNG HPP
+# ----------------------------
+biaya_total = (harga_kemasan * jumlah_kemasan) + harga_gas_per_proses + harga_air_per_proses + biaya_listrik + biaya_sewa_per_proses
+pajak = biaya_total * 0.005
+harga_setelah_pajak = biaya_total + pajak
+harga_dengan_margin = harga_setelah_pajak * (1 + margin / 100)
 
-    st.success("### Hasil Perhitungan")
-    st.write(f"**Total Biaya Produksi:** Rp {total_biaya:,.0f}")
-    st.write(f"**Pajak (0.5%):** Rp {pajak:,.0f}")
-    st.write(f"**HPP per pcs:** Rp {hpp_per_pcs:,.0f}")
-    st.write(f"**Harga Jual disarankan (dengan margin {margin}%):** Rp {harga_jual:,.0f}")
+hpp_per_pcs = harga_dengan_margin / jumlah_kemasan
 
-    # Simpan ke CSV
-    df = pd.DataFrame({
-        "Jenis Kemasan": [kemasan_type],
-        "Ukuran": [ukuran],
-        "Jumlah Produk": [jumlah_produk],
-        "Harga Kemasan per pcs": [harga_kemasan],
-        "Biaya Gas": [gas],
-        "Biaya Air": [air],
-        "Biaya Listrik": [listrik_per_jam],
+# ----------------------------
+# TAMPILAN UTAMA
+# ----------------------------
+st.title("💼 HPP Jasa Kemasan dan Pengawetan Retort")
+
+st.metric("Total Biaya (Rp)", f"{biaya_total:,.0f}")
+st.metric("HPP per pcs (Rp)", f"{hpp_per_pcs:,.0f}")
+st.metric("Harga Jual Saran (Rp)", f"{hpp_per_pcs:,.0f}")
+
+# ----------------------------
+# SIMPAN DATA KE CSV
+# ----------------------------
+if st.button("💾 Simpan ke CSV"):
+    data = pd.DataFrame({
+        "Ukuran Kemasan": [ukuran_kemasan],
+        "Harga Kemasan": [harga_kemasan],
+        "Jumlah": [jumlah_kemasan],
+        "Biaya Total": [biaya_total],
         "Pajak": [pajak],
-        "Total Biaya": [total_dengan_pajak],
-        "HPP per pcs": [hpp_per_pcs],
-        "Harga Jual": [harga_jual]
+        "Harga Akhir/pcs": [hpp_per_pcs]
     })
-    df.to_csv("hasil_perhitungan.csv", index=False)
-    st.success("Data berhasil disimpan sebagai CSV.")
+    filename = f"data_hpp_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+    data.to_csv(filename, index=False)
+    st.success(f"Data berhasil disimpan sebagai {filename}")
 
-    # Export PDF
+# ----------------------------
+# EXPORT PDF
+# ----------------------------
+if st.button("📄 Export ke PDF"):
     pdf = FPDF()
     pdf.add_page()
-    pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, txt="Hasil Perhitungan HPP Retort", ln=True, align='C')
+    pdf.set_font("Arial", 'B', 16)
+    pdf.cell(200, 10, "Laporan HPP Jasa Retort", ln=True, align='C')
+    pdf.set_font("Arial", '', 12)
+
     pdf.ln(10)
-    for col in df.columns:
-        pdf.cell(100, 10, f"{col}: {df[col][0]}", ln=True)
+    pdf.cell(200, 10, f"Ukuran Kemasan: {ukuran_kemasan}", ln=True)
+    pdf.cell(200, 10, f"Jumlah: {jumlah_kemasan} pcs", ln=True)
+    pdf.cell(200, 10, f"Total Biaya: Rp {biaya_total:,.0f}", ln=True)
+    pdf.cell(200, 10, f"Pajak (0.5%): Rp {pajak:,.0f}", ln=True)
+    pdf.cell(200, 10, f"Harga Jual per pcs: Rp {hpp_per_pcs:,.0f}", ln=True)
 
-    pdf.output("hasil_perhitungan.pdf")
-    st.download_button("📥 Download PDF", data=open("hasil_perhitungan.pdf", "rb"), file_name="hasil_HPP_Retort.pdf")
+    file_path = f"/mnt/data/hasil_hpp.pdf"
+    pdf.output(file_path)
+    st.success("Berhasil diekspor ke PDF!")
+    st.download_button("📥 Download PDF", file_name="hasil_hpp.pdf", mime="application/pdf", data=open(file_path, "rb").read())
 
-# ---------------------- RESET ----------------------
-if st.button("Reset Data"):
-    if os.path.exists("hasil_perhitungan.csv"):
-        os.remove("hasil_perhitungan.csv")
-    if os.path.exists("hasil_perhitungan.pdf"):
-        os.remove("hasil_perhitungan.pdf")
-    st.success("Data berhasil direset.")
+# ----------------------------
+# RESET
+# ----------------------------
+if st.button("🔄 Reset Data"):
+    for key in st.session_state.keys():
+        del st.session_state[key]
+    st.experimental_rerun()
