@@ -39,7 +39,18 @@ if tema == "Dark":
 else:
     st.markdown("""
         <style>
-            .main { background-color: #f4f6fa; }
+            .main {
+                background-color: #eaf3fa;
+                color: #001f3f;
+            }
+            .stButton>button {
+                background-color: #001f3f;
+                color: #ffdc00;
+                border: none;
+                padding: 0.5em 1em;
+                font-weight: bold;
+                border-radius: 8px;
+            }
         </style>
     """, unsafe_allow_html=True)
 
@@ -136,28 +147,37 @@ if st.button("📄 Export PDF"):
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Arial", 'B', 16)
+    pdf.set_text_color(0, 31, 63)  # Biru navy
     pdf.cell(200, 10, "Laporan HPP Jasa Retort", ln=True, align='C')
     pdf.set_font("Arial", '', 12)
+    pdf.set_text_color(0, 0, 0)
     pdf.ln(10)
+    tanggal = datetime.datetime.now().strftime('%d-%m-%Y %H:%M')
+    pdf.cell(200, 10, f"Tanggal Input: {tanggal}", ln=True)
+    pdf.cell(200, 10, f"Jenis Kemasan: {jenis_kemasan}", ln=True)
     pdf.cell(200, 10, f"Ukuran Kemasan: {ukuran_kemasan}", ln=True)
-    pdf.cell(200, 10, f"Jumlah Produk: {jumlah_kemasan} pcs", ln=True)
+    pdf.cell(200, 10, f"Harga Kemasan per pcs: Rp {harga_kemasan:,}", ln=True)
+    pdf.cell(200, 10, f"Jumlah Produk Diproses: {jumlah_kemasan} pcs", ln=True)
+    pdf.cell(200, 10, f"Biaya Listrik: Rp {biaya_listrik:,.0f}", ln=True)
+    pdf.cell(200, 10, f"Biaya Gas: Rp {harga_gas_per_proses:,.0f}", ln=True)
+    pdf.cell(200, 10, f"Biaya Air: Rp {harga_air_per_proses:,.0f}", ln=True)
+    pdf.cell(200, 10, f"Biaya Sewa: Rp {biaya_sewa_per_proses:,.0f}", ln=True)
     pdf.cell(200, 10, f"Total Biaya: Rp {biaya_total:,.0f}", ln=True)
     pdf.cell(200, 10, f"Pajak (0.5%): Rp {pajak:,.0f}", ln=True)
+    pdf.cell(200, 10, f"Harga Setelah Margin {margin}%: Rp {harga_dengan_margin:,.0f}", ln=True)
     pdf.cell(200, 10, f"Harga Jual per pcs: Rp {hpp_per_pcs:,.0f}", ln=True)
 
-   # Simpan PDF ke buffer
-buffer = io.BytesIO()
-pdf_bytes = pdf.output(dest='S').encode('latin1')
-buffer = io.BytesIO(pdf_bytes)
-buffer.seek(0)
+    # Simpan dan download
+    pdf_bytes = pdf.output(dest='S').encode('latin1')
+    buffer = io.BytesIO(pdf_bytes)
+    buffer.seek(0)
 
-# Tombol download PDF
-st.download_button(
-    label="📄 Download PDF",
-    data=buffer,
-    file_name="HPP_Retort.pdf",
-    mime="application/pdf"
-)
+    st.download_button(
+        label="📄 Download PDF",
+        data=buffer,
+        file_name=f"Laporan_HPP_{tanggal}.pdf",
+        mime="application/pdf"
+    )
 
 # ----------------------------
 # RESET
