@@ -82,19 +82,19 @@ if jenis_kemasan != "Custom":
     harga_kemasan = kemasan_data[jenis_kemasan][ukuran_kemasan]
 else:
     ukuran_kemasan = st.sidebar.text_input("Ukuran Custom (cth: 10x10 cm)")
-    harga_kemasan = st.sidebar.number_input("Harga Custom per pcs", min_value=100, value=1000)
+    harga_kemasan = st.sidebar.number_input("Harga Custom per pcs", min_value=10, value=1000)
 
-jumlah_kemasan = st.sidebar.number_input("Jumlah Produk Diproses", min_value=15, max_value=100, value=50)
-biaya_sewa_bulanan = st.sidebar.number_input("Biaya Sewa per Bulan", min_value=0, value=1000000)
+jumlah_kemasan = st.sidebar.number_input("Jumlah Produk Diproses", min_value=15, max_value=1000, value=50)
+biaya_sewa_bulanan = st.sidebar.number_input("Biaya Sewa per Bulan", min_value=0, value=500000)
 periode_sewa_bulan = st.sidebar.slider("Periode Pembagian Biaya (bulan)", 1, 24, 12)
 
 # Profit perusahaan
-profit_persen = st.sidebar.slider("🧮 Target Profit Perusahaan (%)", min_value=20, max_value=95, value=30)
+profit_persen = st.sidebar.slider("🧮 Target Profit Perusahaan (%)", min_value=20, max_value=150, value=30)
 
 # ----------------------------
 # PERHITUNGAN BIAYA
 # ----------------------------
-harga_gas_per_proses = 23000 / 5
+harga_gas_per_proses = 23000 / 4
 pemakaian_air_liter = 70
 harga_air_per_liter = 120000 / 500
 harga_air_per_proses = harga_air_per_liter * pemakaian_air_liter
@@ -114,11 +114,13 @@ biaya_total = (harga_kemasan * jumlah_kemasan) + harga_gas_per_proses + harga_ai
 pajak = biaya_total * 0.005
 harga_setelah_pajak = biaya_total + pajak
 
-laba_perusahaan = harga_setelah_pajak * (profit_persen / 100)
-harga_jual_total = harga_setelah_pajak + laba_perusahaan
+biaya_operasional = harga_setelah_pajak * 0.3
+
+laba_perusahaan = biaya_operasional * (profit_persen / 100)
+harga_jual_total = biaya_operasional + laba_perusahaan
 harga_jual_per_pcs = harga_jual_total / jumlah_kemasan
-hpp_per_pcs = harga_setelah_pajak / jumlah_kemasan
-margin_aktual = (laba_perusahaan / harga_setelah_pajak) * 100
+hpp_per_pcs = biaya_operasional / jumlah_kemasan
+margin_aktual = (laba_perusahaan / biaya_operasional) * 100
 
 # ----------------------------
 # OUTPUT TAMPILAN
