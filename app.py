@@ -1,177 +1,68 @@
 import streamlit as st
-import pandas as pd
+import io
 from fpdf import FPDF
 import datetime
-import io
 
-# ----------------------------
-# KONFIGURASI LOGIN
-# ----------------------------
-AUTHORIZED_EMAIL = "rumahretortbersama1@gmail.com"
+st.set_page_config(page_title="HPP Jasa Retort", layout="centered")
+st.title("📦 Kalkulator HPP Jasa Retort UMKM")
 
-if 'logged_in' not in st.session_state:
-    st.session_state.logged_in = False
-
-if not st.session_state.logged_in:
-    st.image("R2B.png", width=180)
-    st.title("🔐 Login Pengguna")
-    email = st.text_input("Masukkan email terdaftar")
-    if st.button("Login"):
-        if email.strip().lower() == AUTHORIZED_EMAIL:
-            st.session_state.logged_in = True
-            st.success("✅ Berhasil login!")
-        else:
-            st.error("❌ Email tidak dikenali.")
-    st.stop()
-
-# ----------------------------
-# MODE TEMA (DARK/LIGHT)
-# ----------------------------
-tema = st.sidebar.radio("🌗 Pilih Tema", ["Light", "Dark"])
-
-if tema == "Dark":
-    st.markdown("""
-        <style>
-            .main { background-color: #0e1117; color: white; }
-            .stButton>button { background-color: #21262d; color: white; }
-        </style>
-    """, unsafe_allow_html=True)
-else:
-    st.markdown("""
-        <style>
-            .main {
-                background-color: #eaf3fa;
-                color: #001f3f;
-            }
-            .stButton>button {
-                background-color: #001f3f;
-                color: #ffdc00;
-                border: none;
-                padding: 0.5em 1em;
-                font-weight: bold;
-                border-radius: 8px;
-            }
-        </style>
-    """, unsafe_allow_html=True)
-
-# ----------------------------
-# DATA KEMASAN
-# ----------------------------
-kemasan_data = {
-    "Bag Retort": {
-        "8x9 cm": 630, "12x12 cm": 1390, "12x15 cm": 1400,
-        "13x21 cm": 2000, "15x20 cm": 2300, "15x30 cm": 3300,
-        "15x40 cm": 4350, "16x23 cm": 2400, "17x25 cm": 3700,
-        "25x34 cm": 5400, "25x50 cm": 10500
-    },
-    "Standing Pouch": {
-        "12x16 cm": 1700, "13x20,5 cm": 2100, "16x29 cm": 4000
+st.markdown("""
+<style>
+    .main {
+        background-color: #eaf3fa;
+        color: #001f3f;
     }
-}
+    .stButton>button {
+        background-color: #001f3f;
+        color: #ffdc00;
+        border: none;
+        padding: 0.5em 1em;
+        font-weight: bold;
+        border-radius: 8px;
+    }
+</style>
+""", unsafe_allow_html=True)
 
-# ----------------------------
-# INPUT DATA
-# ----------------------------
-st.sidebar.image("R2B.png", width=180)
-st.sidebar.markdown("### 📊 Input Data Perhitungan HPP")
+jenis_kemasan = st.selectbox("Jenis Kemasan", ["Retort", "Standing Pouch"])
+ukuran_kemasan = st.text_input("Ukuran Kemasan (ml)")
+harga_kemasan = st.number_input("Harga Kemasan per pcs (Rp)", min_value=0)
+jumlah_kemasan = st.number_input("Jumlah Produk Diproses", min_value=1, value=100)
 
-jenis_kemasan = st.sidebar.selectbox("Jenis Kemasan", list(kemasan_data.keys()) + ["Custom"])
+st.subheader("🔌 Energi & Operasional")
+biaya_listrik = st.number_input("Biaya Listrik (Rp)", min_value=0)
+harga_gas_per_proses = st.number_input("Biaya Gas (Rp)", min_value=0)
+harga_air_per_proses = st.number_input("Biaya Air (Rp)", min_value=0)
+biaya_sewa_per_proses = st.number_input("Biaya Sewa Peralatan (Rp)", min_value=0)
 
-if jenis_kemasan != "Custom":
-    ukuran_kemasan = st.sidebar.selectbox("Ukuran Kemasan", list(kemasan_data[jenis_kemasan].keys()))
-    harga_kemasan = kemasan_data[jenis_kemasan][ukuran_kemasan]
-else:
-    ukuran_kemasan = st.sidebar.text_input("Ukuran Custom (cth: 10x10 cm)")
-    harga_kemasan = st.sidebar.number_input("Harga Custom per pcs", min_value=100, value=1000)
+# Hapus input margin keuntungan
+# margin = st.slider("Margin Keuntungan (%)", min_value=10, max_value=100, value=30)
 
-jumlah_kemasan = st.sidebar.number_input("Jumlah Produk Diproses", min_value=15, max_value=100, value=50)
-margin = st.sidebar.slider("Margin Keuntungan (%)", 0, 100, 20)
-biaya_sewa_bulanan = st.sidebar.number_input("Biaya Sewa per Bulan", min_value=0, value=1000000)
-periode_sewa_bulan = st.sidebar.slider("Periode Pembagian Biaya (bulan)", 1, 24, 12)
+# Tambahkan input profit perusahaan
+profit_persen = st.slider("Profit Perusahaan (%)", min_value=20, max_value=75, value=30)
 
-# ----------------------------
-# PERHITUNGAN BIAYA
-# ----------------------------
-harga_gas_per_proses = 23000 / 5
-pemakaian_air_liter = 70
-harga_air_per_liter = 120000 / 500
-harga_air_per_proses = harga_air_per_liter * pemakaian_air_liter
-
-def hitung_listrik():
-    freezer = (140 / 1000) * 24
-    vacuum = (120 / 1000) * 2
-    sealer = (500 / 1000) * 2
-    lampu = (4 * 25 / 1000) * 5.5
-    total_kwh = freezer + vacuum + sealer + lampu
-    return total_kwh * 1500  # Tarif listrik/kWh
-
-biaya_listrik = hitung_listrik()
-biaya_sewa_per_proses = biaya_sewa_bulanan / 30
-
-biaya_total = (harga_kemasan * jumlah_kemasan) + harga_gas_per_proses + harga_air_per_proses + biaya_listrik + biaya_sewa_per_proses
-# Input tambahan: Profit perusahaan yang diinginkan
-profit_persen = st.slider("🧮 Target Profit Perusahaan (%)", min_value=20, max_value=75, value=30)
-
-# Perhitungan: Keuntungan perusahaan berdasarkan persentase
-laba_perusahaan = (biaya_total * profit_persen / 100)
-
-# Harga jual dengan laba perusahaan
-harga_dengan_profit = biaya_total + laba_perusahaan
-
-# Hitung margin aktual (dari biaya ke harga jual)
-margin_aktual = ((harga_dengan_profit - biaya_total) / biaya_total) * 100
-
-# Harga jual per pcs
-harga_jual_per_pcs = harga_dengan_profit / jumlah_kemasan
-
-# Tampilkan hasil tambahan
-st.markdown("### 💰 Hasil Perhitungan Profit Perusahaan")
-col1, col2 = st.columns(2)
-col1.metric("Laba Perusahaan", f"Rp {laba_perusahaan:,.0f}")
-col2.metric("Harga Jual Total", f"Rp {harga_dengan_profit:,.0f}")
-
-st.metric("Harga Jual per Pcs", f"Rp {harga_jual_per_pcs:,.0f}")
-st.metric("Margin Aktual", f"{margin_aktual:.2f}%")
-
+# Hitung HPP
+total_kemasan = harga_kemasan * jumlah_kemasan
+total_operasional = biaya_listrik + harga_gas_per_proses + harga_air_per_proses + biaya_sewa_per_proses
+biaya_total = total_kemasan + total_operasional
 pajak = biaya_total * 0.005
-harga_setelah_pajak = biaya_total + pajak
-harga_dengan_margin = harga_setelah_pajak * (1 + margin / 100)
-hpp_per_pcs = harga_dengan_margin / jumlah_kemasan
 
-# ----------------------------
-# OUTPUT TAMPILAN
-# ----------------------------
-st.title("💼 HPP Jasa Kemasan & Pengolahan Retort")
+# Perhitungan HPP tanpa margin, menggunakan profit perusahaan
+harga_setelah_profit = biaya_total + pajak + (biaya_total * profit_persen / 100)
+hpp_per_pcs = harga_setelah_profit / jumlah_kemasan
 
-col1, col2, col3 = st.columns(3)
-col1.metric("📦 Total Biaya", f"Rp {biaya_total:,.0f}")
-col2.metric("💸 HPP per pcs", f"Rp {hpp_per_pcs:,.0f}")
-col3.metric("💰 Harga Jual", f"Rp {hpp_per_pcs:,.0f}")
+st.subheader("📊 Ringkasan")
+st.write(f"Total Biaya: Rp {biaya_total:,.0f}")
+st.write(f"Pajak 0.5%: Rp {pajak:,.0f}")
+st.write(f"Profit {profit_persen}%: Rp {(biaya_total * profit_persen / 100):,.0f}")
+st.write(f"Harga Setelah Profit: Rp {harga_setelah_profit:,.0f}")
+st.success(f"HPP per pcs: Rp {hpp_per_pcs:,.0f}")
 
-# ----------------------------
-# EKSPOR CSV
-# ----------------------------
-if st.button("💾 Simpan CSV"):
-    data = pd.DataFrame({
-        "Ukuran Kemasan": [ukuran_kemasan],
-        "Harga Kemasan": [harga_kemasan],
-        "Jumlah": [jumlah_kemasan],
-        "Biaya Total": [biaya_total],
-        "Pajak": [pajak],
-        "Harga per pcs": [hpp_per_pcs]
-    })
-    filename = f"data_hpp_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
-    data.to_csv(filename, index=False)
-    st.success(f"✅ Disimpan sebagai {filename}")
-
-# ----------------------------
-# EKSPOR PDF
-# ----------------------------
+# Export PDF
 if st.button("📄 Export PDF"):
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Arial", 'B', 16)
-    pdf.set_text_color(0, 31, 63)  # Biru navy
+    pdf.set_text_color(0, 31, 63)
     pdf.cell(200, 10, "Laporan HPP Jasa Retort", ln=True, align='C')
     pdf.set_font("Arial", '', 12)
     pdf.set_text_color(0, 0, 0)
@@ -188,10 +79,10 @@ if st.button("📄 Export PDF"):
     pdf.cell(200, 10, f"Biaya Sewa: Rp {biaya_sewa_per_proses:,.0f}", ln=True)
     pdf.cell(200, 10, f"Total Biaya: Rp {biaya_total:,.0f}", ln=True)
     pdf.cell(200, 10, f"Pajak (0.5%): Rp {pajak:,.0f}", ln=True)
-    pdf.cell(200, 10, f"Harga Setelah Margin {margin}%: Rp {harga_dengan_margin:,.0f}", ln=True)
+    pdf.cell(200, 10, f"Profit {profit_persen}%: Rp {(biaya_total * profit_persen / 100):,.0f}", ln=True)
+    pdf.cell(200, 10, f"Harga Setelah Profit: Rp {harga_setelah_profit:,.0f}", ln=True)
     pdf.cell(200, 10, f"Harga Jual per pcs: Rp {hpp_per_pcs:,.0f}", ln=True)
 
-    # Simpan dan download
     pdf_bytes = pdf.output(dest='S').encode('latin1')
     buffer = io.BytesIO(pdf_bytes)
     buffer.seek(0)
@@ -202,11 +93,3 @@ if st.button("📄 Export PDF"):
         file_name=f"Laporan_HPP_{tanggal}.pdf",
         mime="application/pdf"
     )
-
-# ----------------------------
-# RESET
-# ----------------------------
-if st.button("🔄 Reset"):
-    for k in list(st.session_state.keys()):
-        del st.session_state[k]
-    st.rerun()
