@@ -1,0 +1,4 @@
+import os
+
+image_path = os.path.join(os.path.dirname(__file__), "R2B.png")
+st.image(image_path, width=180)
