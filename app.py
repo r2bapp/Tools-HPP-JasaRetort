@@ -114,7 +114,7 @@ biaya_total = (harga_kemasan * jumlah_kemasan) + harga_gas_per_proses + harga_ai
 pajak = biaya_total * 0.005
 harga_setelah_pajak = biaya_total + pajak
 
-biaya_operasional = harga_setelah_pajak * 0.3
+biaya_operasional = harga_setelah_pajak + 0.3
 
 laba_perusahaan = biaya_operasional * (profit_persen / 100)
 harga_jual_total = biaya_operasional + laba_perusahaan
