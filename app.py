@@ -147,7 +147,8 @@ if st.button("📄 Export PDF"):
 
    # Simpan PDF ke buffer
 buffer = io.BytesIO()
-pdf.output(buffer)
+pdf_bytes = pdf.output(dest='S').encode('latin1')
+buffer = io.BytesIO(pdf_bytes)
 buffer.seek(0)
 
 # Tombol download PDF
