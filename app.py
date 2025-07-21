@@ -5,9 +5,10 @@ import datetime
 import io
 
 # ----------------------------
-# KONFIGURASI LOGIN
+# KONFIGURASI LOGIN (BERDASARKAN NAMA)
 # ----------------------------
-AUTHORIZED_EMAIL = "rumahretortbersama1@gmail.com"
+
+AUTHORIZED_USERS = ["bagoes", "dimas", "iwan"]  # Semua huruf kecil untuk pencocokan
 
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
@@ -15,13 +16,16 @@ if 'logged_in' not in st.session_state:
 if not st.session_state.logged_in:
     st.image("R2B.png", width=180)
     st.title("🔐 Login Pengguna")
-    email = st.text_input("Masukkan email terdaftar")
+
+    nama = st.text_input("Masukkan nama pengguna (contoh: Bagoes)").strip().lower()
+
     if st.button("Login"):
-        if email.strip().lower() == AUTHORIZED_EMAIL:
+        if nama in AUTHORIZED_USERS:
             st.session_state.logged_in = True
-            st.success("✅ Berhasil login!")
+            st.session_state.username = nama  # Simpan nama pengguna
+            st.success(f"✅ Selamat datang, {nama.title()}!")
         else:
-            st.error("❌ Email tidak dikenali.")
+            st.error("❌ Nama tidak dikenali. Silakan coba lagi.")
     st.stop()
 
 # ----------------------------
