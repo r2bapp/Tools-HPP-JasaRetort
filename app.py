@@ -144,7 +144,7 @@ margin_aktual = (laba_perusahaan / biaya_setelah_pajak) * 100
 # OUTPUT TAMPILAN
 # ----------------------------
 
-st.title("💼 HPP Jasa Kemasan & Pengolahan Retort")
+st.title("HPP Jasa Kemasan & Pengolahan Retort by Rumah Retort Bersama")
 
 col1, col2 = st.columns(2)
 col1.metric("📦 Biaya Produksi", f"Rp {biaya_total:,.0f}")
