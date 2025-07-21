@@ -82,65 +82,63 @@ if jenis_kemasan != "Custom":
     harga_kemasan = kemasan_data[jenis_kemasan][ukuran_kemasan]
 else:
     ukuran_kemasan = st.sidebar.text_input("Ukuran Custom (cth: 10x10 cm)")
-    harga_kemasan = st.sidebar.number_input("Harga Custom per pcs", min_value=10, value=1000)
+    harga_kemasan = st.sidebar.number_input("Harga Custom per pcs", min_value=100, value=1000)
 
-jumlah_kemasan = st.sidebar.number_input("Jumlah Produk Diproses", min_value=15, max_value=1000, value=50)
-biaya_sewa_bulanan = st.sidebar.number_input("Biaya Sewa per Bulan", min_value=0, value=500000)
+jumlah_kemasan = st.sidebar.number_input("Jumlah Produk Diproses", min_value=15, max_value=100, value=50)
+biaya_sewa_bulanan = st.sidebar.number_input("Biaya Sewa per Bulan", min_value=0, value=1000000)
 periode_sewa_bulan = st.sidebar.slider("Periode Pembagian Biaya (bulan)", 1, 24, 12)
 
 # Profit perusahaan
-profit_persen = st.sidebar.slider("🧮 Target Profit Perusahaan (%)", min_value=20, max_value=150, value=30)
+profit_persen = st.sidebar.slider("🧮 Target Profit Perusahaan (%)", min_value=20, max_value=75, value=30)
 
 # ----------------------------
-# PERHITUNGAN BIAYA
+# PERHITUNGAN FINAL
 # ----------------------------
-harga_gas_per_proses = 23000 / 4
-pemakaian_air_liter = 70
-harga_air_per_liter = 120000 / 500
-harga_air_per_proses = harga_air_per_liter * pemakaian_air_liter
 
-def hitung_listrik():
-    freezer = (140 / 1000) * 24
-    vacuum = (120 / 1000) * 2
-    sealer = (500 / 1000) * 2
-    lampu = (4 * 25 / 1000) * 5.5
-    total_kwh = freezer + vacuum + sealer + lampu
-    return total_kwh * 1500
+# Tambahkan Biaya Operasional 30%
+biaya_operasional = biaya_total * 0.30
+biaya_total_final = biaya_total + biaya_operasional
 
-biaya_listrik = hitung_listrik()
-biaya_sewa_per_proses = biaya_sewa_bulanan / 30
-biaya_total = (harga_kemasan * jumlah_kemasan) + harga_gas_per_proses + harga_air_per_proses + biaya_listrik + biaya_sewa_per_proses
+# Pajak 0.5%
+pajak = biaya_total_final * 0.005
+biaya_setelah_pajak = biaya_total_final + pajak
 
-pajak = biaya_total * 0.005
-harga_setelah_pajak = biaya_total + pajak
-
-biaya_operasional = harga_setelah_pajak + 0.3
-
-laba_perusahaan = biaya_operasional * (profit_persen / 100)
-harga_jual_total = biaya_operasional + laba_perusahaan
+# Hitung Harga Jual
+harga_jual_total = biaya_setelah_pajak * (1 + profit_persen / 100)
 harga_jual_per_pcs = harga_jual_total / jumlah_kemasan
-hpp_per_pcs = biaya_operasional / jumlah_kemasan
-margin_aktual = (laba_perusahaan / biaya_operasional) * 100
+
+# Hitung Laba dan Margin Aktual
+laba_perusahaan = harga_jual_total - biaya_setelah_pajak
+margin_aktual = (laba_perusahaan / biaya_setelah_pajak) * 100
 
 # ----------------------------
 # OUTPUT TAMPILAN
 # ----------------------------
+
 st.title("💼 HPP Jasa Kemasan & Pengolahan Retort")
-st.markdown("### 💰 Hasil Perhitungan")
+
+col1, col2 = st.columns(2)
+col1.metric("📦 Biaya Produksi", f"Rp {biaya_total:,.0f}")
+col2.metric("⚙️ Biaya Operasional (30%)", f"Rp {biaya_operasional:,.0f}")
+
+st.metric("🧾 Total Biaya + Pajak", f"Rp {biaya_setelah_pajak:,.0f}")
 
 col1, col2, col3 = st.columns(3)
-col1.metric("📦 Total Biaya", f"Rp {biaya_total:,.0f}")
-col2.metric("💸 HPP per pcs", f"Rp {hpp_per_pcs:,.0f}")
-col3.metric("💰 Harga Jual per pcs", f"Rp {harga_jual_per_pcs:,.0f}")
+col1.metric("💰 Harga Jual Total", f"Rp {harga_jual_total:,.0f}")
+col2.metric("🧮 Harga Jual per Pcs", f"Rp {harga_jual_per_pcs:,.0f}")
+col3.metric("📈 Laba Perusahaan", f"Rp {laba_perusahaan:,.0f}")
 
-st.metric("Laba Perusahaan", f"Rp {laba_perusahaan:,.0f}")
-st.metric("Harga Jual Total", f"Rp {harga_jual_total:,.0f}")
-st.metric("Margin Aktual", f"{margin_aktual:.2f}%")
+st.metric("🔁 Margin Aktual", f"{margin_aktual:.2f}%")
 
-st.markdown("### 📈 Perbandingan Harga")
-st.write(f"- **HPP per pcs (setelah pajak)**: Rp {hpp_per_pcs:,.0f}")
-st.write(f"- **Harga Jual per pcs (profit {profit_persen}%)**: Rp {harga_jual_per_pcs:,.0f}")
-st.write(f"- **Margin Aktual dari HPP**: {margin_aktual:.2f}%")
+# ----------------------------
+# PERBANDINGAN
+# ----------------------------
+st.markdown("### 📊 Ringkasan Perbandingan Harga")
+st.write(f"- **Biaya Produksi Asli**: Rp {biaya_total:,.0f}")
+st.write(f"- **+ Biaya Operasional (30%)**: Rp {biaya_total_final:,.0f}")
+st.write(f"- **+ Pajak 0.5%**: Rp {biaya_setelah_pajak:,.0f}")
+st.write(f"- **Harga Jual per pcs (dengan target profit {profit_persen}%)**: Rp {harga_jual_per_pcs:,.0f}")
+st.write(f"- **Margin aktual**: {margin_aktual:.2f}%")
 
 # ----------------------------
 # EKSPOR CSV
