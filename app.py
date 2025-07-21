@@ -145,10 +145,18 @@ if st.button("📄 Export PDF"):
     pdf.cell(200, 10, f"Pajak (0.5%): Rp {pajak:,.0f}", ln=True)
     pdf.cell(200, 10, f"Harga Jual per pcs: Rp {hpp_per_pcs:,.0f}", ln=True)
 
-    buffer = io.BytesIO()
-    pdf.output(buffer)
-    buffer.seek(0)
-    st.download_button("📥 Download PDF", data=buffer, file_name="hasil_hpp.pdf", mime="application/pdf")
+   # Simpan PDF ke buffer
+buffer = io.BytesIO()
+pdf.output(buffer)
+buffer.seek(0)
+
+# Tombol download PDF
+st.download_button(
+    label="📄 Download PDF",
+    data=buffer,
+    file_name="HPP_Retort.pdf",
+    mime="application/pdf"
+)
 
 # ----------------------------
 # RESET
