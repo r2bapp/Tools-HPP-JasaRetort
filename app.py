@@ -92,6 +92,35 @@ periode_sewa_bulan = st.sidebar.slider("Periode Pembagian Biaya (bulan)", 1, 24,
 profit_persen = st.sidebar.slider("🧮 Target Profit Perusahaan (%)", min_value=20, max_value=75, value=30)
 
 # ----------------------------
+# PERHITUNGAN BIAYA
+# ----------------------------
+harga_gas_per_proses = 23000 / 5
+pemakaian_air_liter = 70
+harga_air_per_liter = 120000 / 500
+harga_air_per_proses = harga_air_per_liter * pemakaian_air_liter
+
+def hitung_listrik():
+    freezer = (140 / 1000) * 24
+    vacuum = (120 / 1000) * 2
+    sealer = (500 / 1000) * 2
+    lampu = (4 * 25 / 1000) * 5.5
+    total_kwh = freezer + vacuum + sealer + lampu
+    return total_kwh * 1500
+
+biaya_listrik = hitung_listrik()
+biaya_sewa_per_proses = biaya_sewa_bulanan / 30
+biaya_total = (harga_kemasan * jumlah_kemasan) + harga_gas_per_proses + harga_air_per_proses + biaya_listrik + biaya_sewa_per_proses
+
+pajak = biaya_total * 0.005
+harga_setelah_pajak = biaya_total + pajak
+
+laba_perusahaan = harga_setelah_pajak * (profit_persen / 100)
+harga_jual_total = harga_setelah_pajak + laba_perusahaan
+harga_jual_per_pcs = harga_jual_total / jumlah_kemasan
+hpp_per_pcs = harga_setelah_pajak / jumlah_kemasan
+margin_aktual = (laba_perusahaan / harga_setelah_pajak) * 100
+
+# ----------------------------
 # PERHITUNGAN FINAL
 # ----------------------------
 
@@ -139,6 +168,7 @@ st.write(f"- **+ Biaya Operasional (30%)**: Rp {biaya_total_final:,.0f}")
 st.write(f"- **+ Pajak 0.5%**: Rp {biaya_setelah_pajak:,.0f}")
 st.write(f"- **Harga Jual per pcs (dengan target profit {profit_persen}%)**: Rp {harga_jual_per_pcs:,.0f}")
 st.write(f"- **Margin aktual**: {margin_aktual:.2f}%")
+
 
 # ----------------------------
 # EKSPOR CSV
