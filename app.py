@@ -109,6 +109,30 @@ biaya_listrik = hitung_listrik()
 biaya_sewa_per_proses = biaya_sewa_bulanan / 30
 
 biaya_total = (harga_kemasan * jumlah_kemasan) + harga_gas_per_proses + harga_air_per_proses + biaya_listrik + biaya_sewa_per_proses
+# Input tambahan: Profit perusahaan yang diinginkan
+profit_persen = st.slider("🧮 Target Profit Perusahaan (%)", min_value=20, max_value=75, value=30)
+
+# Perhitungan: Keuntungan perusahaan berdasarkan persentase
+laba_perusahaan = (biaya_total * profit_persen / 100)
+
+# Harga jual dengan laba perusahaan
+harga_dengan_profit = biaya_total + laba_perusahaan
+
+# Hitung margin aktual (dari biaya ke harga jual)
+margin_aktual = ((harga_dengan_profit - biaya_total) / biaya_total) * 100
+
+# Harga jual per pcs
+harga_jual_per_pcs = harga_dengan_profit / jumlah_kemasan
+
+# Tampilkan hasil tambahan
+st.markdown("### 💰 Hasil Perhitungan Profit Perusahaan")
+col1, col2 = st.columns(2)
+col1.metric("Laba Perusahaan", f"Rp {laba_perusahaan:,.0f}")
+col2.metric("Harga Jual Total", f"Rp {harga_dengan_profit:,.0f}")
+
+st.metric("Harga Jual per Pcs", f"Rp {harga_jual_per_pcs:,.0f}")
+st.metric("Margin Aktual", f"{margin_aktual:.2f}%")
+
 pajak = biaya_total * 0.005
 harga_setelah_pajak = biaya_total + pajak
 harga_dengan_margin = harga_setelah_pajak * (1 + margin / 100)
