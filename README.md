@@ -1,32 +1,23 @@
-# 💼 Tools HPP Jasa Kemasan dan Pengawetan Retort
+# 💼 Tools HPP Jasa Retort - Rumah Retort Bersama
 
-Aplikasi berbasis Streamlit untuk menghitung Harga Pokok Produksi (HPP) jasa kemasan dan pengawetan produk menggunakan teknologi retort. Dikembangkan khusus untuk UMKM pangan agar lebih mudah memahami struktur biaya dan menentukan harga jual produk.
+Aplikasi berbasis **Streamlit** untuk menghitung Harga Pokok Produksi (HPP) jasa kemasan dan pengolahan menggunakan sistem **retort**.
 
----
-
-## 🎯 Fitur Utama
-
-- 🔐 Login pengguna (hanya email terotorisasi: `rumahretortbersama1@gmail.com`)
-- 📦 Input data jenis dan ukuran kemasan (retort & standing pouch atau custom)
-- ⚡ Kalkulasi biaya energi (listrik, gas, air), sewa, pajak, dan margin keuntungan
-- 📊 Tampilan hasil HPP interaktif (biaya total, HPP per pcs, harga jual)
-- 💾 Simpan hasil perhitungan ke file CSV
-- 📄 Export laporan ke PDF
-- 🔄 Tombol Reset untuk memulai perhitungan baru
-- 🎨 UI minimalis modern dengan warna branding navy dan kuning khas R2B
+Cocok digunakan oleh pelaku UMKM pengolahan pangan agar dapat mengetahui estimasi biaya dan menentukan harga jual yang adil dan menguntungkan.
 
 ---
 
-## 📸 Tampilan
-
-![Tampilan Aplikasi](https://github.com/r2bapp/Tools-HPP-JasaRetort/assets/preview.jpg)
+## 🚀 Fitur Utama
+- ✅ Login sistem (hanya email terverifikasi)
+- ✅ Input dinamis untuk berbagai ukuran kemasan
+- ✅ Perhitungan otomatis: biaya kemasan, air, gas, listrik, sewa, pajak, margin
+- ✅ Ekspor laporan dalam bentuk **CSV** dan **PDF**
+- ✅ Tampilan clean dengan **mode Light/Dark**
+- ✅ Branding dengan logo **Rumah Retort Bersama (R2B)**
 
 ---
 
-## 🚀 Cara Menjalankan Secara Lokal
-
-### 1. Clone Repository
-
+## 🛠️ Cara Menjalankan
+### 1. Clone repositori ini
 ```bash
 git clone https://github.com/r2bapp/Tools-HPP-JasaRetort.git
 cd Tools-HPP-JasaRetort
