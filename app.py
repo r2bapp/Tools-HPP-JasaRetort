@@ -82,20 +82,20 @@ if jenis_kemasan != "Custom":
     harga_kemasan = kemasan_data[jenis_kemasan][ukuran_kemasan]
 else:
     ukuran_kemasan = st.sidebar.text_input("Ukuran Custom (cth: 10x10 cm)")
-    harga_kemasan = st.sidebar.number_input("Harga Custom per pcs", min_value=100, value=1000)
+    harga_kemasan = st.sidebar.number_input("Harga Custom per pcs", min_value=10, value=1000)
 
-jumlah_kemasan = st.sidebar.number_input("Jumlah Produk Diproses", min_value=15, max_value=100, value=50)
+jumlah_kemasan = st.sidebar.number_input("Jumlah Produk Diproses", min_value=15, max_value=1000, value=50)
 biaya_sewa_bulanan = st.sidebar.number_input("Biaya Sewa per Bulan", min_value=0, value=1000000)
 periode_sewa_bulan = st.sidebar.slider("Periode Pembagian Biaya (bulan)", 1, 24, 12)
 
 # Profit perusahaan
-profit_persen = st.sidebar.slider("🧮 Target Profit Perusahaan (%)", min_value=20, max_value=75, value=30)
+profit_persen = st.sidebar.slider("🧮 Target Profit Perusahaan (%)", min_value=20, max_value=150, value=30)
 
 # ----------------------------
 # PERHITUNGAN BIAYA
 # ----------------------------
-harga_gas_per_proses = 23000 / 5
-pemakaian_air_liter = 70
+harga_gas_per_proses = 23000 / 4
+pemakaian_air_liter = 80
 harga_air_per_liter = 120000 / 500
 harga_air_per_proses = harga_air_per_liter * pemakaian_air_liter
 
@@ -103,7 +103,7 @@ def hitung_listrik():
     freezer = (140 / 1000) * 24
     vacuum = (120 / 1000) * 2
     sealer = (500 / 1000) * 2
-    lampu = (4 * 25 / 1000) * 5.5
+    lampu = (6 * 30 / 1000) * 5.5
     total_kwh = freezer + vacuum + sealer + lampu
     return total_kwh * 1500
 
