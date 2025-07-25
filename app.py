@@ -130,6 +130,34 @@ profit_bersih = laba_perusahaan
 profit_kotor = harga_jual_total - biaya_total
 margin_aktual = (profit_bersih / biaya_setelah_pajak) * 100
 
+# -------------------------------------
+# HITUNG FIXED COST dan TARGET PROSES
+# -------------------------------------
+st.markdown("### 🎯 Target Proses Retort (Agar Menutup Fixed Cost)")
+
+# Ambil fixed cost dari input user
+fixed_cost_bulanan = sewa + biaya_listrik + biaya_gas + biaya_air
+
+# Laba bersih per batch (setelah pajak dan margin)
+laba_bersih_per_batch = laba_bersih  # diasumsikan sudah dihitung sebelumnya
+
+# Hindari pembagian nol
+if laba_bersih_per_batch > 0:
+    target_per_bulan = int(fixed_cost_bulanan / laba_bersih_per_batch) + 1
+else:
+    target_per_bulan = 0
+
+target_per_hari = int(target_per_bulan / 30) + 1
+target_per_minggu = int(target_per_bulan / 4) + 1
+target_per_3bulan = target_per_bulan * 3
+
+st.write(f"- Biaya Operasional Tetap/Bulan: Rp {fixed_cost_bulanan:,.0f}")
+st.write(f"- Laba Bersih per Batch: Rp {laba_bersih_per_batch:,.0f}")
+st.write(f"- Target per Hari: {target_per_hari} batch")
+st.write(f"- Target per Minggu: {target_per_minggu} batch")
+st.write(f"- Target per Bulan: {target_per_bulan} batch")
+st.write(f"- Target per 3 Bulan: {target_per_3bulan} batch")
+
 # Target retort realistis
 harga_per_proses = harga_jual_per_pcs * jumlah_kemasan
 
