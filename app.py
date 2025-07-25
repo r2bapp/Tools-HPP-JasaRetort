@@ -220,7 +220,7 @@ if st.button("🖨️ Ekspor PDF"):
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, txt="Laporan Perhitungan HPP", ln=True, align="C")
+    pdf.cell(0, 10, "PDF berhasil diekspor dan disimpan", ln=True)
     pdf.ln(10)
 
     pdf.multi_cell(0, 10, txt=f"""
