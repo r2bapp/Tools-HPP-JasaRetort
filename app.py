@@ -166,6 +166,7 @@ col2.metric("💼 Cadangan Operasional (10%)", f"Rp {biaya_cadangan_operasional:
 
 st.metric("🧾 Total Biaya + Pajak", f"Rp {harga_setelah_pajak:,.0f}")
 st.metric("🧮 Harga Jual per Pcs", f"Rp {harga_jual_per_pcs:,.0f}")
+st.metric("📊 Laba Perusahaan", f"Rp {harga_dengan_profit - harga_setelah_pajak:,.0f}")
 st.metric("📈 Margin Aktual", f"{margin_aktual:.2f}%")
 
 # Target produksi
