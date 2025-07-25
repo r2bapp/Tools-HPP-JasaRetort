@@ -94,6 +94,16 @@ periode_sewa_bulan = st.sidebar.slider("Periode Pembagian Biaya (bulan)", 1, 24,
 
 profit_persen = st.sidebar.slider("🧮 Target Profit Perusahaan (%)", min_value=20, max_value=150, value=30)
 
+# -------------------------------------
+# HITUNG FIXED COST dan TARGET PROSES
+# -------------------------------------
+
+st.markdown("## 💰 Input Biaya Tetap (Fixed Cost Bulanan)")
+sewa = st.number_input("Biaya Sewa Tempat (Rp)", min_value=0, value=500000, step=10000)
+biaya_listrik = st.number_input("Biaya Listrik (Rp)", min_value=0, value=300000, step=10000)
+biaya_gas = st.number_input("Biaya Gas (Rp)", min_value=0, value=200000, step=10000)
+biaya_air = st.number_input("Biaya Air (Rp)", min_value=0, value=100000, step=10000)
+
 # ----------------------------
 # PERHITUNGAN BIAYA
 # ----------------------------
@@ -129,11 +139,6 @@ laba_perusahaan = harga_jual_total - biaya_setelah_pajak
 profit_bersih = laba_perusahaan
 profit_kotor = harga_jual_total - biaya_total
 margin_aktual = (profit_bersih / biaya_setelah_pajak) * 100
-
-# -------------------------------------
-# HITUNG FIXED COST dan TARGET PROSES
-# -------------------------------------
-st.markdown("### 🎯 Target Proses Retort (Agar Menutup Fixed Cost)")
 
 # Ambil fixed cost dari input user
 fixed_cost_bulanan = sewa + biaya_listrik + biaya_gas + biaya_air
