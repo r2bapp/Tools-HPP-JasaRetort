@@ -130,12 +130,23 @@ profit_bersih = laba_perusahaan
 profit_kotor = harga_jual_total - biaya_total
 margin_aktual = (profit_bersih / biaya_setelah_pajak) * 100
 
-# Target retort realistis
+# Perhitungan harga pendapatan per proses (1 batch)
 harga_per_proses = harga_jual_per_pcs * jumlah_kemasan
 
-retort_per_hari = int((biaya_total_final * 1.2) / harga_per_proses)
-retort_per_minggu = retort_per_hari * 6
-retort_per_bulan = retort_per_hari * 26
+# Tambahkan margin 20% untuk menutup risiko & keuntungan
+margin_safety = 1.2
+target_pendapatan = biaya_total_final * margin_safety
+
+# Hitung jumlah proses yang diperlukan per hari agar usaha bisa menutup semua biaya + margin
+retort_per_hari = int(target_pendapatan / harga_per_proses)
+
+# Jika ingin menetapkan default minimum 4 proses per hari (misalnya realistis dari kapasitas alat)
+# Maka bisa gunakan: maksimal dari hasil perhitungan atau minimal 4
+retort_per_hari = max(retort_per_hari, 4)
+
+# Hitung untuk minggu/bulan
+retort_per_minggu = retort_per_hari * 6     # 6 hari kerja
+retort_per_bulan = retort_per_hari * 26     # 26 hari kerja rata-rata
 retort_per_3bulan = retort_per_bulan * 3
 
 # ----------------------------
