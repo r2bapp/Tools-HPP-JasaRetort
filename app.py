@@ -209,14 +209,20 @@ st.bar_chart(df_chart.set_index("Komponen"))
 # ----------------------------
 if st.button("💾 Simpan CSV"):
     data = pd.DataFrame({
+        "Jenis Kemasan": [jenis_kemasan],
         "Ukuran Kemasan": [ukuran_kemasan],
         "Harga Kemasan": [harga_kemasan],
         "Jumlah Produk": [jumlah_kemasan],
         "Total Biaya": [biaya_total],
+        "Biaya Operasional": [biaya_operasional],
+        "Biaya Tenaga Kerja": [biaya_tenaga_kerja],
+        "Cadangan": [cadangan_operasional],
         "Pajak": [pajak],
+        "Total Setelah Pajak": [biaya_setelah_pajak],
         "HPP per pcs": [hpp_per_pcs],
         "Harga Jual per pcs": [harga_jual_per_pcs],
-        "Laba Perusahaan": [laba_perusahaan]
+        "Laba Perusahaan": [laba_perusahaan],
+        "Margin (%)": [margin_aktual]
     })
     filename = f"data_hpp_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
     data.to_csv(filename, index=False)
@@ -231,6 +237,7 @@ if st.button("📄 Export PDF"):
     pdf.set_font("Arial", 'B', 16)
     pdf.set_text_color(0, 31, 63)
     pdf.cell(200, 10, "Laporan HPP Jasa Retort", ln=True, align='C')
+
     pdf.set_font("Arial", '', 12)
     pdf.set_text_color(0, 0, 0)
     pdf.ln(10)
@@ -244,14 +251,19 @@ if st.button("📄 Export PDF"):
     pdf.cell(200, 10, f"Biaya Gas: Rp {harga_gas_per_proses:,.0f}", ln=True)
     pdf.cell(200, 10, f"Biaya Air: Rp {harga_air_per_proses:,.0f}", ln=True)
     pdf.cell(200, 10, f"Biaya Sewa: Rp {biaya_sewa_per_proses:,.0f}", ln=True)
-    pdf.cell(200, 10, f"Total Biaya: Rp {biaya_total:,.0f}", ln=True)
+    pdf.cell(200, 10, f"Total Biaya Produksi: Rp {biaya_total:,.0f}", ln=True)
+    pdf.cell(200, 10, f"Biaya Operasional: Rp {biaya_operasional:,.0f}", ln=True)
+    pdf.cell(200, 10, f"Cadangan Operasional: Rp {cadangan_operasional:,.0f}", ln=True)
+    pdf.cell(200, 10, f"Biaya Tenaga Kerja: Rp {biaya_tenaga_kerja:,.0f}", ln=True)
     pdf.cell(200, 10, f"Pajak (0.5%): Rp {pajak:,.0f}", ln=True)
+    pdf.cell(200, 10, f"Total Setelah Pajak: Rp {biaya_setelah_pajak:,.0f}", ln=True)
     pdf.cell(200, 10, f"Laba Perusahaan ({profit_persen}%): Rp {laba_perusahaan:,.0f}", ln=True)
     pdf.cell(200, 10, f"Harga Jual Total: Rp {harga_jual_total:,.0f}", ln=True)
     pdf.cell(200, 10, f"Harga Jual per pcs: Rp {harga_jual_per_pcs:,.0f}", ln=True)
+    pdf.cell(200, 10, f"Margin Aktual: {margin_aktual:.2f}%", ln=True)
 
     buffer = io.BytesIO()
-    pdf.output(buffer)  # langsung tulis ke BytesIO tanpa encode manual
+    pdf.output(buffer)
     buffer.seek(0)
 
     st.download_button(
