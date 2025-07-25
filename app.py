@@ -94,7 +94,6 @@ periode_sewa_bulan = st.sidebar.slider("Periode Pembagian Biaya (bulan)", 1, 24,
 
 # Profit perusahaan
 profit_persen = st.sidebar.slider("🧮 Target Profit Perusahaan (%)", min_value=20, max_value=150, value=30)
-
 # ----------------------------
 # PERHITUNGAN BIAYA
 # ----------------------------
@@ -113,41 +112,30 @@ def hitung_listrik():
 
 biaya_listrik = hitung_listrik()
 biaya_sewa_per_proses = biaya_sewa_bulanan / 30
+
+# Biaya awal sebelum tambahan
 biaya_total = (harga_kemasan * jumlah_kemasan) + harga_gas_per_proses + harga_air_per_proses + biaya_listrik + biaya_sewa_per_proses
 
-pajak = biaya_total * 0.005
-harga_setelah_pajak = biaya_total + pajak
-
-laba_perusahaan = harga_setelah_pajak * (profit_persen / 100)
-harga_jual_total = harga_setelah_pajak + laba_perusahaan
-harga_jual_per_pcs = harga_jual_total / jumlah_kemasan
-hpp_per_pcs = harga_setelah_pajak / jumlah_kemasan
-margin_aktual = (laba_perusahaan / harga_setelah_pajak) * 100
-
 # ----------------------------
-# PERHITUNGAN FINAL (UPDATE)
+# PERHITUNGAN FINAL
 # ----------------------------
-
-# Komponen biaya
 biaya_tenaga_kerja_harian = 150000
 biaya_operasional = biaya_total * 0.30
 biaya_cadangan_operasional = biaya_total * 0.10
 
-# Total semua biaya
 biaya_total_final = biaya_total + biaya_operasional + biaya_cadangan_operasional + biaya_tenaga_kerja_harian
-
-# Pajak dan harga jual
 pajak = biaya_total_final * 0.005
 harga_setelah_pajak = biaya_total_final + pajak
 harga_dengan_profit = harga_setelah_pajak * (1 + profit_persen / 100)
 
-# Harga per pcs dan margin aktual
 harga_jual_per_pcs = harga_dengan_profit / jumlah_kemasan
 hpp_per_pcs = harga_setelah_pajak / jumlah_kemasan
 laba_perusahaan = harga_dengan_profit - harga_setelah_pajak
 margin_aktual = (harga_jual_per_pcs - hpp_per_pcs) / hpp_per_pcs * 100
 
-# Target proses retort (jumlah pcs untuk menutup biaya)
+# ----------------------------
+# TARGET PRODUKSI
+# ----------------------------
 target_mingguan_pcs = round(biaya_total_final / (harga_jual_per_pcs * 7))
 target_bulanan_pcs = round(biaya_total_final / (harga_jual_per_pcs * 30))
 target_3bulan_pcs = round(biaya_total_final / (harga_jual_per_pcs * 90))
@@ -157,19 +145,15 @@ target_3bulan_pcs = round(biaya_total_final / (harga_jual_per_pcs * 90))
 # ----------------------------
 saran = ""
 if margin_aktual < 10:
-    saran = "⚠️ Margin terlalu rendah. Pertimbangkan menaikkan harga jual atau mengurangi biaya operasional."
+    saran = "⚠️ Margin terlalu rendah. Pertimbangkan menaikkan harga jual atau menurunkan biaya produksi."
 elif target_bulanan_pcs > 1000:
-    saran = "📊 Target bulanan cukup besar. Pastikan kapasitas produksi memadai dan tenaga kerja cukup."
+    saran = "📊 Target produksi bulanan tinggi. Pertimbangkan peningkatan efisiensi atau kapasitas alat."
 else:
-    saran = "✅ Struktur harga sudah optimal untuk mencapai profit."
-
-st.markdown("### 💡 Saran Otomatis")
-st.info(saran)
+    saran = "✅ Perhitungan dan margin cukup optimal. Produksi bisa dijalankan dengan aman."
 
 # ----------------------------
-# OUTPUT TAMPILAN
+# OUTPUT
 # ----------------------------
-
 st.title("💼 HPP Jasa Kemasan & Pengolahan Retort")
 
 col1, col2 = st.columns(2)
@@ -177,40 +161,30 @@ col1.metric("📦 Biaya Produksi", f"Rp {biaya_total:,.0f}")
 col2.metric("⚙️ Biaya Operasional (30%)", f"Rp {biaya_operasional:,.0f}")
 
 col1, col2 = st.columns(2)
-col1.metric("👷 Biaya Tenaga Kerja Harian", f"Rp {biaya_tenaga_kerja:,.0f}")
-col2.metric("💼 Cadangan Operasional (10%)", f"Rp {cadangan_operasional:,.0f}")
+col1.metric("👷 Biaya Tenaga Kerja Harian", f"Rp {biaya_tenaga_kerja_harian:,.0f}")
+col2.metric("💼 Cadangan Operasional (10%)", f"Rp {biaya_cadangan_operasional:,.0f}")
 
-st.metric("🧾 Total Biaya + Pajak", f"Rp {biaya_setelah_pajak:,.0f}")
+st.metric("🧾 Total Biaya + Pajak", f"Rp {harga_setelah_pajak:,.0f}")
+st.metric("🧮 Harga Jual per Pcs", f"Rp {harga_jual_per_pcs:,.0f}")
+st.metric("📈 Margin Aktual", f"{margin_aktual:.2f}%")
 
-col1, col2, col3 = st.columns(3)
-col1.metric("💰 Harga Jual Total", f"Rp {harga_jual_total:,.0f}")
-col2.metric("🧮 Harga Jual per Pcs", f"Rp {harga_jual_per_pcs:,.0f}")
-col3.metric("📈 Laba Perusahaan", f"Rp {laba_perusahaan:,.0f}")
+# Target produksi
+st.markdown("### 🎯 Target Produk Retort")
+st.write(f"- Mingguan: {target_mingguan_pcs} pcs")
+st.write(f"- Bulanan: {target_bulanan_pcs} pcs")
+st.write(f"- 3 Bulan: {target_3bulan_pcs} pcs")
 
-st.metric("🔁 Margin Aktual", f"{margin_aktual:.2f}%")
-
-# Tambahan: Tampilkan Target Produksi
-st.metric("🎯 Target Produk Retort yang Harus Diproses", f"{int(target_produk_retort):,} pcs")
-
-# ----------------------------
-# PERBANDINGAN
-# ----------------------------
-st.markdown("### 📊 Ringkasan Perbandingan Harga")
-st.write(f"- **Biaya Produksi Asli**: Rp {biaya_total:,.0f}")
-st.write(f"- **+ Biaya Operasional (30%)**: Rp {biaya_operasional:,.0f}")
-st.write(f"- **+ Biaya Tenaga Kerja**: Rp {biaya_tenaga_kerja:,.0f}")
-st.write(f"- **+ Cadangan Operasional (10%)**: Rp {cadangan_operasional:,.0f}")
-st.write(f"- **Total Biaya + Pajak (0.5%)**: Rp {biaya_setelah_pajak:,.0f}")
-st.write(f"- **Harga Jual per pcs (dengan target profit {profit_persen}%)**: Rp {harga_jual_per_pcs:,.0f}")
-st.write(f"- **Margin aktual**: {margin_aktual:.2f}%")
+# Saran otomatis
+st.markdown("### 💡 Saran Otomatis")
+st.info(saran)
 
 # ----------------------------
-# GRAFIK VISUAL
+# VISUALISASI GRAFIK
 # ----------------------------
-st.markdown("### 📉 Grafik Komponen Biaya")
+st.markdown("### 📊 Grafik Komponen Biaya")
 data_chart = {
     "Komponen": ["Produksi", "Operasional", "Cadangan", "Tenaga Kerja", "Pajak"],
-    "Biaya (Rp)": [biaya_total, biaya_operasional, cadangan_operasional, biaya_tenaga_kerja, pajak],
+    "Biaya (Rp)": [biaya_total, biaya_operasional, biaya_cadangan_operasional, biaya_tenaga_kerja_harian, pajak],
 }
 df_chart = pd.DataFrame(data_chart)
 st.bar_chart(df_chart.set_index("Komponen"))
@@ -218,15 +192,14 @@ st.bar_chart(df_chart.set_index("Komponen"))
 # ----------------------------
 # EKSPOR CSV
 # ----------------------------
-import pandas as pd
 if st.button("💾 Simpan CSV"):
-    data = pd.DataFrame({
+    df_export = pd.DataFrame({
         "Ukuran Kemasan": [ukuran_kemasan],
         "Jumlah Kemasan": [jumlah_kemasan],
-        "Biaya Total": [biaya_total],
+        "Biaya Produksi": [biaya_total],
         "Biaya Operasional": [biaya_operasional],
         "Cadangan Operasional": [biaya_cadangan_operasional],
-        "Tenaga Kerja Harian": [biaya_tenaga_kerja_harian],
+        "Tenaga Kerja": [biaya_tenaga_kerja_harian],
         "Total Biaya Final": [biaya_total_final],
         "Harga Jual per pcs": [harga_jual_per_pcs],
         "Margin Aktual": [f"{margin_aktual:.2f}%"],
@@ -235,41 +208,40 @@ if st.button("💾 Simpan CSV"):
         "Target 3 Bulan (pcs)": [target_3bulan_pcs],
         "Saran": [saran]
     })
-    data.to_csv("perhitungan_hpp.csv", index=False)
+    df_export.to_csv("perhitungan_hpp.csv", index=False)
     st.success("✅ Data berhasil disimpan dalam format CSV.")
 
 # ----------------------------
 # EKSPOR PDF
 # ----------------------------
 from fpdf import FPDF
-import datetime
 
 if st.button("🖨️ Ekspor PDF"):
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Arial", size=12)
-
     pdf.cell(200, 10, txt="Laporan Perhitungan HPP", ln=True, align="C")
     pdf.ln(10)
-    pdf.cell(200, 10, txt=f"Tanggal: {datetime.datetime.now().strftime('%d-%m-%Y')}", ln=True)
 
-    pdf.ln(10)
-    pdf.multi_cell(0, 10, txt=f"Ukuran Kemasan: {ukuran_kemasan}\n"
-                               f"Jumlah Kemasan: {jumlah_kemasan}\n"
-                               f"Biaya Total: Rp {biaya_total:,.0f}\n"
-                               f"Biaya Operasional: Rp {biaya_operasional:,.0f}\n"
-                               f"Cadangan Operasional: Rp {biaya_cadangan_operasional:,.0f}\n"
-                               f"Tenaga Kerja Harian: Rp {biaya_tenaga_kerja_harian:,.0f}\n"
-                               f"Total Biaya Final: Rp {biaya_total_final:,.0f}\n"
-                               f"Harga Jual per pcs: Rp {harga_jual_per_pcs:,.0f}\n"
-                               f"Margin Aktual: {margin_aktual:.2f}%\n"
-                               f"Target Mingguan: {target_mingguan_pcs} pcs\n"
-                               f"Target Bulanan: {target_bulanan_pcs} pcs\n"
-                               f"Target 3 Bulan: {target_3bulan_pcs} pcs\n"
-                               f"Saran: {saran}")
+    pdf.multi_cell(0, 10, txt=f"""
+Ukuran Kemasan: {ukuran_kemasan}
+Jumlah: {jumlah_kemasan}
+Biaya Produksi: Rp {biaya_total:,.0f}
+Operasional: Rp {biaya_operasional:,.0f}
+Cadangan: Rp {biaya_cadangan_operasional:,.0f}
+Tenaga Kerja: Rp {biaya_tenaga_kerja_harian:,.0f}
+Total + Pajak: Rp {harga_setelah_pajak:,.0f}
+Harga Jual /pcs: Rp {harga_jual_per_pcs:,.0f}
+Margin: {margin_aktual:.2f}%
+Target Mingguan: {target_mingguan_pcs} pcs
+Target Bulanan: {target_bulanan_pcs} pcs
+Target 3 Bulan: {target_3bulan_pcs} pcs
 
+Saran:
+{saran}
+""")
     pdf.output("laporan_hpp.pdf")
-    st.success("✅ PDF berhasil diekspor.")
+    st.success("✅ PDF berhasil diekspor.") st.success("✅ PDF berhasil diekspor.")
 
 # ----------------------------
 # RESET
