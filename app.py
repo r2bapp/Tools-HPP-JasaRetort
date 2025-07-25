@@ -250,8 +250,8 @@ if st.button("📄 Export PDF"):
     pdf.cell(200, 10, f"Harga Jual Total: Rp {harga_jual_total:,.0f}", ln=True)
     pdf.cell(200, 10, f"Harga Jual per pcs: Rp {harga_jual_per_pcs:,.0f}", ln=True)
 
-    pdf_bytes = pdf.output(dest='S').encode('latin1')
-    buffer = io.BytesIO(pdf_bytes)
+    buffer = io.BytesIO()
+    pdf.output(buffer)  # langsung tulis ke BytesIO tanpa encode manual
     buffer.seek(0)
 
     st.download_button(
