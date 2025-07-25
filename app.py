@@ -5,9 +5,10 @@ import datetime
 import io
 
 # ----------------------------
-# KONFIGURASI LOGIN
+# KONFIGURASI LOGIN (BERDASARKAN NAMA)
 # ----------------------------
-AUTHORIZED_EMAIL = "rumahretortbersama1@gmail.com"
+
+AUTHORIZED_USERS = ["bagoes", "dimas", "iwan"]  # Semua huruf kecil untuk pencocokan
 
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
@@ -15,13 +16,16 @@ if 'logged_in' not in st.session_state:
 if not st.session_state.logged_in:
     st.image("R2B.png", width=180)
     st.title("🔐 Login Pengguna")
-    email = st.text_input("Masukkan email terdaftar")
+
+    nama = st.text_input("Masukkan nama pengguna (contoh: Bagoes)").strip().lower()
+
     if st.button("Login"):
-        if email.strip().lower() == AUTHORIZED_EMAIL:
+        if nama in AUTHORIZED_USERS:
             st.session_state.logged_in = True
-            st.success("✅ Berhasil login!")
+            st.session_state.username = nama  # Simpan nama pengguna
+            st.success(f"✅ Selamat datang, {nama.title()}!")
         else:
-            st.error("❌ Email tidak dikenali.")
+            st.error("❌ Nama tidak dikenali. Silakan coba lagi.")
     st.stop()
 
 # ----------------------------
@@ -82,18 +86,20 @@ if jenis_kemasan != "Custom":
     harga_kemasan = kemasan_data[jenis_kemasan][ukuran_kemasan]
 else:
     ukuran_kemasan = st.sidebar.text_input("Ukuran Custom (cth: 10x10 cm)")
-    harga_kemasan = st.sidebar.number_input("Harga Custom per pcs", min_value=100, value=1000)
+    harga_kemasan = st.sidebar.number_input("Harga Custom per pcs", min_value=10, value=1000)
 
-jumlah_kemasan = st.sidebar.number_input("Jumlah Produk Diproses", min_value=15, max_value=100, value=50)
-margin = st.sidebar.slider("Margin Keuntungan (%)", 0, 100, 20)
+jumlah_kemasan = st.sidebar.number_input("Jumlah Produk Diproses", min_value=15, max_value=1000, value=50)
 biaya_sewa_bulanan = st.sidebar.number_input("Biaya Sewa per Bulan", min_value=0, value=1000000)
 periode_sewa_bulan = st.sidebar.slider("Periode Pembagian Biaya (bulan)", 1, 24, 12)
+
+# Profit perusahaan
+profit_persen = st.sidebar.slider("🧮 Target Profit Perusahaan (%)", min_value=20, max_value=150, value=30)
 
 # ----------------------------
 # PERHITUNGAN BIAYA
 # ----------------------------
-harga_gas_per_proses = 23000 / 5
-pemakaian_air_liter = 70
+harga_gas_per_proses = 24000 / 4
+pemakaian_air_liter = 80
 harga_air_per_liter = 120000 / 500
 harga_air_per_proses = harga_air_per_liter * pemakaian_air_liter
 
@@ -101,52 +107,102 @@ def hitung_listrik():
     freezer = (140 / 1000) * 24
     vacuum = (120 / 1000) * 2
     sealer = (500 / 1000) * 2
-    lampu = (4 * 25 / 1000) * 5.5
+    lampu = (6 * 30 / 1000) * 5.5
     total_kwh = freezer + vacuum + sealer + lampu
-    return total_kwh * 1500  # Tarif listrik/kWh
+    return total_kwh * 1500
 
 biaya_listrik = hitung_listrik()
 biaya_sewa_per_proses = biaya_sewa_bulanan / 30
-
 biaya_total = (harga_kemasan * jumlah_kemasan) + harga_gas_per_proses + harga_air_per_proses + biaya_listrik + biaya_sewa_per_proses
-# Input tambahan: Profit perusahaan yang diinginkan
-profit_persen = st.slider("🧮 Target Profit Perusahaan (%)", min_value=20, max_value=75, value=30)
-
-# Perhitungan: Keuntungan perusahaan berdasarkan persentase
-laba_perusahaan = (biaya_total * profit_persen / 100)
-
-# Harga jual dengan laba perusahaan
-harga_dengan_profit = biaya_total + laba_perusahaan
-
-# Hitung margin aktual (dari biaya ke harga jual)
-margin_aktual = ((harga_dengan_profit - biaya_total) / biaya_total) * 100
-
-# Harga jual per pcs
-harga_jual_per_pcs = harga_dengan_profit / jumlah_kemasan
-
-# Tampilkan hasil tambahan
-st.markdown("### 💰 Hasil Perhitungan Profit Perusahaan")
-col1, col2 = st.columns(2)
-col1.metric("Laba Perusahaan", f"Rp {laba_perusahaan:,.0f}")
-col2.metric("Harga Jual Total", f"Rp {harga_dengan_profit:,.0f}")
-
-st.metric("Harga Jual per Pcs", f"Rp {harga_jual_per_pcs:,.0f}")
-st.metric("Margin Aktual", f"{margin_aktual:.2f}%")
 
 pajak = biaya_total * 0.005
 harga_setelah_pajak = biaya_total + pajak
-harga_dengan_margin = harga_setelah_pajak * (1 + margin / 100)
-hpp_per_pcs = harga_dengan_margin / jumlah_kemasan
+
+laba_perusahaan = harga_setelah_pajak * (profit_persen / 100)
+harga_jual_total = harga_setelah_pajak + laba_perusahaan
+harga_jual_per_pcs = harga_jual_total / jumlah_kemasan
+hpp_per_pcs = harga_setelah_pajak / jumlah_kemasan
+margin_aktual = (laba_perusahaan / harga_setelah_pajak) * 100
+
+# ----------------------------
+# PERHITUNGAN FINAL
+# ----------------------------
+
+# Tambahkan Biaya Tenaga Kerja Harian
+biaya_tenaga_kerja = 150_000
+
+# Tambahkan Biaya Operasional 30%
+biaya_operasional = biaya_total * 0.30
+
+# Tambahkan Cadangan Operasional 10%
+cadangan_operasional = biaya_total * 0.10
+
+# Total Biaya Final setelah semua tambahan
+biaya_total_final = biaya_total + biaya_operasional + cadangan_operasional + biaya_tenaga_kerja
+
+# Pajak 0.5%
+pajak = biaya_total_final * 0.005
+biaya_setelah_pajak = biaya_total_final + pajak
+
+# Hitung Harga Jual
+harga_jual_total = biaya_setelah_pajak * (1 + profit_persen / 100)
+harga_jual_per_pcs = harga_jual_total / jumlah_kemasan
+
+# Hitung Laba dan Margin Aktual
+laba_perusahaan = harga_jual_total - biaya_setelah_pajak
+margin_aktual = (laba_perusahaan / biaya_setelah_pajak) * 100
+
+# Hitung Target Jumlah Produk yang Harus Diproses
+target_produk_retort = harga_jual_total // harga_jual_per_pcs
 
 # ----------------------------
 # OUTPUT TAMPILAN
 # ----------------------------
+
 st.title("💼 HPP Jasa Kemasan & Pengolahan Retort")
 
+col1, col2 = st.columns(2)
+col1.metric("📦 Biaya Produksi", f"Rp {biaya_total:,.0f}")
+col2.metric("⚙️ Biaya Operasional (30%)", f"Rp {biaya_operasional:,.0f}")
+
+col1, col2 = st.columns(2)
+col1.metric("👷 Biaya Tenaga Kerja Harian", f"Rp {biaya_tenaga_kerja:,.0f}")
+col2.metric("💼 Cadangan Operasional (10%)", f"Rp {cadangan_operasional:,.0f}")
+
+st.metric("🧾 Total Biaya + Pajak", f"Rp {biaya_setelah_pajak:,.0f}")
+
 col1, col2, col3 = st.columns(3)
-col1.metric("📦 Total Biaya", f"Rp {biaya_total:,.0f}")
-col2.metric("💸 HPP per pcs", f"Rp {hpp_per_pcs:,.0f}")
-col3.metric("💰 Harga Jual", f"Rp {hpp_per_pcs:,.0f}")
+col1.metric("💰 Harga Jual Total", f"Rp {harga_jual_total:,.0f}")
+col2.metric("🧮 Harga Jual per Pcs", f"Rp {harga_jual_per_pcs:,.0f}")
+col3.metric("📈 Laba Perusahaan", f"Rp {laba_perusahaan:,.0f}")
+
+st.metric("🔁 Margin Aktual", f"{margin_aktual:.2f}%")
+
+# Tambahan: Tampilkan Target Produksi
+st.metric("🎯 Target Produk Retort yang Harus Diproses", f"{int(target_produk_retort):,} pcs")
+
+# ----------------------------
+# PERBANDINGAN
+# ----------------------------
+st.markdown("### 📊 Ringkasan Perbandingan Harga")
+st.write(f"- **Biaya Produksi Asli**: Rp {biaya_total:,.0f}")
+st.write(f"- **+ Biaya Operasional (30%)**: Rp {biaya_operasional:,.0f}")
+st.write(f"- **+ Biaya Tenaga Kerja**: Rp {biaya_tenaga_kerja:,.0f}")
+st.write(f"- **+ Cadangan Operasional (10%)**: Rp {cadangan_operasional:,.0f}")
+st.write(f"- **Total Biaya + Pajak (0.5%)**: Rp {biaya_setelah_pajak:,.0f}")
+st.write(f"- **Harga Jual per pcs (dengan target profit {profit_persen}%)**: Rp {harga_jual_per_pcs:,.0f}")
+st.write(f"- **Margin aktual**: {margin_aktual:.2f}%")
+
+# ----------------------------
+# GRAFIK VISUAL
+# ----------------------------
+st.markdown("### 📉 Grafik Komponen Biaya")
+data_chart = {
+    "Komponen": ["Produksi", "Operasional", "Cadangan", "Tenaga Kerja", "Pajak"],
+    "Biaya (Rp)": [biaya_total, biaya_operasional, cadangan_operasional, biaya_tenaga_kerja, pajak],
+}
+df_chart = pd.DataFrame(data_chart)
+st.bar_chart(df_chart.set_index("Komponen"))
 
 # ----------------------------
 # EKSPOR CSV
@@ -155,10 +211,12 @@ if st.button("💾 Simpan CSV"):
     data = pd.DataFrame({
         "Ukuran Kemasan": [ukuran_kemasan],
         "Harga Kemasan": [harga_kemasan],
-        "Jumlah": [jumlah_kemasan],
-        "Biaya Total": [biaya_total],
+        "Jumlah Produk": [jumlah_kemasan],
+        "Total Biaya": [biaya_total],
         "Pajak": [pajak],
-        "Harga per pcs": [hpp_per_pcs]
+        "HPP per pcs": [hpp_per_pcs],
+        "Harga Jual per pcs": [harga_jual_per_pcs],
+        "Laba Perusahaan": [laba_perusahaan]
     })
     filename = f"data_hpp_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
     data.to_csv(filename, index=False)
@@ -171,7 +229,7 @@ if st.button("📄 Export PDF"):
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Arial", 'B', 16)
-    pdf.set_text_color(0, 31, 63)  # Biru navy
+    pdf.set_text_color(0, 31, 63)
     pdf.cell(200, 10, "Laporan HPP Jasa Retort", ln=True, align='C')
     pdf.set_font("Arial", '', 12)
     pdf.set_text_color(0, 0, 0)
@@ -188,10 +246,10 @@ if st.button("📄 Export PDF"):
     pdf.cell(200, 10, f"Biaya Sewa: Rp {biaya_sewa_per_proses:,.0f}", ln=True)
     pdf.cell(200, 10, f"Total Biaya: Rp {biaya_total:,.0f}", ln=True)
     pdf.cell(200, 10, f"Pajak (0.5%): Rp {pajak:,.0f}", ln=True)
-    pdf.cell(200, 10, f"Harga Setelah Margin {margin}%: Rp {harga_dengan_margin:,.0f}", ln=True)
-    pdf.cell(200, 10, f"Harga Jual per pcs: Rp {hpp_per_pcs:,.0f}", ln=True)
+    pdf.cell(200, 10, f"Laba Perusahaan ({profit_persen}%): Rp {laba_perusahaan:,.0f}", ln=True)
+    pdf.cell(200, 10, f"Harga Jual Total: Rp {harga_jual_total:,.0f}", ln=True)
+    pdf.cell(200, 10, f"Harga Jual per pcs: Rp {harga_jual_per_pcs:,.0f}", ln=True)
 
-    # Simpan dan download
     pdf_bytes = pdf.output(dest='S').encode('latin1')
     buffer = io.BytesIO(pdf_bytes)
     buffer.seek(0)
