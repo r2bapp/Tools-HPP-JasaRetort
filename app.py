@@ -92,7 +92,7 @@ jumlah_kemasan = st.sidebar.number_input("Jumlah Produk Diproses", min_value=15,
 biaya_sewa_bulanan = st.sidebar.number_input("Biaya Sewa per Bulan", min_value=0, value=1000000)
 periode_sewa_bulan = st.sidebar.slider("Periode Pembagian Biaya (bulan)", 1, 24, 12)
 
-profit_persen = st.sidebar.slider("🧮 Target Profit Perusahaan (%)", min_value=20, max_value=150, value=30)
+profit_persen = st.sidebar.slider("🧮 Target Profit Perusahaan (%)", min_value=1, max_value=150, value=30)
 
 # ----------------------------
 # PERHITUNGAN BIAYA
