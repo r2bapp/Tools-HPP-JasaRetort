@@ -92,7 +92,7 @@ jumlah_kemasan = st.sidebar.number_input("Jumlah Produk Diproses", min_value=15,
 biaya_sewa_bulanan = st.sidebar.number_input("Biaya Sewa per Bulan", min_value=0, value=1000000)
 periode_sewa_bulan = st.sidebar.slider("Periode Pembagian Biaya (bulan)", 1, 24, 12)
 
-profit_persen = st.sidebar.slider("🧮 Target Profit Perusahaan (%)", min_value=1, max_value=150, value=30)
+profit_persen = st.sidebar.slider("🧮 Target Profit Perusahaan (%)", min_value=1, max_value=150, value=63)
 
 # ----------------------------
 # PERHITUNGAN BIAYA
@@ -161,10 +161,10 @@ col3.metric("📈 Laba Perusahaan", f"Rp {laba_perusahaan:,.0f}")
 st.metric("📊 Margin Aktual", f"{margin_aktual:.2f}%")
 
 st.markdown("### 🎯 Target Proses Retort")
-st.write(f"- Per Hari: {retort_per_hari} batch")
-st.write(f"- Per Minggu: {retort_per_minggu} batch")
-st.write(f"- Per Bulan: {retort_per_bulan} batch")
-st.write(f"- Per 3 Bulan: {retort_per_3bulan} batch")
+st.write(f"- Per Hari: {retort_per_hari} proses")
+st.write(f"- Per Minggu: {retort_per_minggu} proses")
+st.write(f"- Per Bulan: {retort_per_bulan} proses")
+st.write(f"- Per 3 Bulan: {retort_per_3bulan} proses")
 
 st.markdown("### 📍 Profitabilitas")
 st.write(f"- 💵 Profit Kotor: Rp {profit_kotor:,.0f}")
