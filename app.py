@@ -131,8 +131,8 @@ margin_aktual = (laba_perusahaan / harga_setelah_pajak) * 100
 # Tambahkan Biaya Tenaga Kerja Harian
 biaya_tenaga_kerja = 150_000
 
-# Tambahkan Biaya Operasional 30%
-biaya_operasional = biaya_total * 0.30
+# Tambahkan Biaya Operasional 35%
+biaya_operasional = biaya_total * 0.35
 
 # Tambahkan Cadangan Operasional 10%
 cadangan_operasional = biaya_total * 0.10
