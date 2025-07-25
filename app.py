@@ -221,26 +221,27 @@ if st.button("🖨️ Ekspor PDF"):
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Arial", size=12)
-    pdf.cell(0, 10, "PDF berhasil diekspor dan disimpan", ln=True)
+    pdf.cell(0, 10, "Laporan HPP", ln=True)
     pdf.ln(10)
 
-    pdf.multi_cell(0, 10, txt=f"""
-Ukuran Kemasan: {ukuran_kemasan}
-Jumlah: {jumlah_kemasan}
-Biaya Produksi: Rp {biaya_total:,.0f}
-Operasional: Rp {biaya_operasional:,.0f}
-Cadangan: Rp {biaya_cadangan_operasional:,.0f}
-Tenaga Kerja: Rp {biaya_tenaga_kerja_harian:,.0f}
-Total + Pajak: Rp {harga_setelah_pajak:,.0f}
-Harga Jual /pcs: Rp {harga_jual_per_pcs:,.0f}
-Margin: {margin_aktual:.2f}%
-Target Mingguan: {target_mingguan_pcs} pcs
-Target Bulanan: {target_bulanan_pcs} pcs
-Target 3 Bulan: {target_3bulan_pcs} pcs
+    # Pisahkan per baris agar tidak error encode
+    pdf.cell(0, 10, f"Ukuran Kemasan: {ukuran_kemasan}", ln=True)
+    pdf.cell(0, 10, f"Jumlah: {jumlah_kemasan}", ln=True)
+    pdf.cell(0, 10, f"Biaya Produksi: Rp {biaya_total:,.0f}", ln=True)
+    pdf.cell(0, 10, f"Operasional: Rp {biaya_operasional:,.0f}", ln=True)
+    pdf.cell(0, 10, f"Cadangan: Rp {biaya_cadangan_operasional:,.0f}", ln=True)
+    pdf.cell(0, 10, f"Tenaga Kerja: Rp {biaya_tenaga_kerja_harian:,.0f}", ln=True)
+    pdf.cell(0, 10, f"Total + Pajak: Rp {harga_setelah_pajak:,.0f}", ln=True)
+    pdf.cell(0, 10, f"Harga Jual /pcs: Rp {harga_jual_per_pcs:,.0f}", ln=True)
+    pdf.cell(0, 10, f"Margin: {margin_aktual:.2f}%", ln=True)
+    pdf.cell(0, 10, f"Target Mingguan: {target_mingguan_pcs} pcs", ln=True)
+    pdf.cell(0, 10, f"Target Bulanan: {target_bulanan_pcs} pcs", ln=True)
+    pdf.cell(0, 10, f"Target 3 Bulan: {target_3bulan_pcs} pcs", ln=True)
 
-Saran:
-{saran}
-""")
+    pdf.ln(5)
+    pdf.cell(0, 10, "Saran:", ln=True)
+    pdf.multi_cell(0, 10, txt=saran.encode('latin-1', 'replace').decode('latin-1'))  # Handle unicode safely
+
     pdf.output("laporan_hpp.pdf")
     st.success("✅ PDF berhasil diekspor.")
 
