@@ -131,8 +131,8 @@ margin_aktual = (laba_perusahaan / harga_setelah_pajak) * 100
 # Tambahkan Biaya Tenaga Kerja Harian
 biaya_tenaga_kerja = 150_000
 
-# Tambahkan Biaya Operasional 35%
-biaya_operasional = biaya_total * 0.35
+# Tambahkan Biaya Operasional 30%
+biaya_operasional = biaya_total * 0.30
 
 # Tambahkan Cadangan Operasional 10%
 cadangan_operasional = biaya_total * 0.10
@@ -163,7 +163,7 @@ st.title("💼 HPP Jasa Kemasan & Pengolahan Retort")
 
 col1, col2 = st.columns(2)
 col1.metric("📦 Biaya Produksi", f"Rp {biaya_total:,.0f}")
-col2.metric("⚙️ Biaya Operasional (35%)", f"Rp {biaya_operasional:,.0f}")
+col2.metric("⚙️ Biaya Operasional (30%)", f"Rp {biaya_operasional:,.0f}")
 
 col1, col2 = st.columns(2)
 col1.metric("👷 Biaya Tenaga Kerja Harian", f"Rp {biaya_tenaga_kerja:,.0f}")
@@ -186,7 +186,7 @@ st.metric("🎯 Target Produk Retort yang Harus Diproses", f"{int(target_produk_
 # ----------------------------
 st.markdown("### 📊 Ringkasan Perbandingan Harga")
 st.write(f"- **Biaya Produksi Asli**: Rp {biaya_total:,.0f}")
-st.write(f"- **+ Biaya Operasional (35%)**: Rp {biaya_operasional:,.0f}")
+st.write(f"- **+ Biaya Operasional (30%)**: Rp {biaya_operasional:,.0f}")
 st.write(f"- **+ Biaya Tenaga Kerja**: Rp {biaya_tenaga_kerja:,.0f}")
 st.write(f"- **+ Cadangan Operasional (10%)**: Rp {cadangan_operasional:,.0f}")
 st.write(f"- **Total Biaya + Pajak (0.5%)**: Rp {biaya_setelah_pajak:,.0f}")
