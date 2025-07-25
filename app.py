@@ -133,9 +133,9 @@ margin_aktual = (profit_bersih / biaya_setelah_pajak) * 100
 # Target retort realistis
 harga_per_proses = harga_jual_per_pcs * jumlah_kemasan
 
-retort_per_hari = int((biaya_total_final * 1.1) / harga_per_proses)
-retort_per_minggu = retort_per_hari * 7
-retort_per_bulan = retort_per_hari * 30
+retort_per_hari = int((biaya_total_final * 1.2) / harga_per_proses)
+retort_per_minggu = retort_per_hari * 6
+retort_per_bulan = retort_per_hari * 26
 retort_per_3bulan = retort_per_bulan * 3
 
 # ----------------------------
@@ -161,10 +161,21 @@ col3.metric("📈 Laba Perusahaan", f"Rp {laba_perusahaan:,.0f}")
 st.metric("📊 Margin Aktual", f"{margin_aktual:.2f}%")
 
 st.markdown("### 🎯 Target Proses Retort")
-st.write(f"- Per Hari: {retort_per_hari * 4} proses")
-st.write(f"- Per Minggu: {retort_per_minggu * 28} proses")
-st.write(f"- Per Bulan: {retort_per_bulan * 120} proses")
-st.write(f"- Per 3 Bulan: {retort_per_3bulan * 480} proses")
+# Aturan warna: jika target harian terlalu tinggi, beri warna merah
+if retort_per_hari <= 4:
+    warna = "green"
+    keterangan = "Target realistis 👍"
+else:
+    warna = "red"
+    keterangan = "Target terlalu tinggi ⚠️"
+
+# Tampilkan target per hari dengan warna
+st.markdown(f"<span style='color:{warna}; font-size:18px;'>🔸 Per Hari: <b>{retort_per_hari}</b> proses – {keterangan}</span>", unsafe_allow_html=True)
+
+# Sisanya bisa tetap standar
+st.write(f"- Per Minggu: {retort_per_minggu} proses")
+st.write(f"- Per Bulan: {retort_per_bulan} proses")
+st.write(f"- Per 3 Bulan: {retort_per_3bulan} proses")
 
 st.markdown("### 📍 Profitabilitas")
 st.write(f"- 💵 Profit Kotor: Rp {profit_kotor:,.0f}")
