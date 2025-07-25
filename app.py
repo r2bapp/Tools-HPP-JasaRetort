@@ -98,7 +98,7 @@ profit_persen = st.sidebar.slider("🧮 Target Profit Perusahaan (%)", min_value
 # ----------------------------
 # PERHITUNGAN BIAYA
 # ----------------------------
-harga_gas_per_proses = 23000 / 4
+harga_gas_per_proses = 24000 / 4
 pemakaian_air_liter = 80
 harga_air_per_liter = 120000 / 500
 harga_air_per_proses = harga_air_per_liter * pemakaian_air_liter
@@ -128,9 +128,17 @@ margin_aktual = (laba_perusahaan / harga_setelah_pajak) * 100
 # PERHITUNGAN FINAL
 # ----------------------------
 
+# Tambahkan Biaya Tenaga Kerja Harian
+biaya_tenaga_kerja = 150_000
+
 # Tambahkan Biaya Operasional 30%
 biaya_operasional = biaya_total * 0.30
-biaya_total_final = biaya_total + biaya_operasional
+
+# Tambahkan Cadangan Operasional 10%
+cadangan_operasional = biaya_total * 0.10
+
+# Total Biaya Final setelah semua tambahan
+biaya_total_final = biaya_total + biaya_operasional + cadangan_operasional + biaya_tenaga_kerja
 
 # Pajak 0.5%
 pajak = biaya_total_final * 0.005
@@ -144,15 +152,22 @@ harga_jual_per_pcs = harga_jual_total / jumlah_kemasan
 laba_perusahaan = harga_jual_total - biaya_setelah_pajak
 margin_aktual = (laba_perusahaan / biaya_setelah_pajak) * 100
 
+# Hitung Target Jumlah Produk yang Harus Diproses
+target_produk_retort = harga_jual_total // harga_jual_per_pcs
+
 # ----------------------------
 # OUTPUT TAMPILAN
 # ----------------------------
 
-st.title("HPP Jasa Kemasan & Pengolahan Retort by Rumah Retort Bersama")
+st.title("💼 HPP Jasa Kemasan & Pengolahan Retort")
 
 col1, col2 = st.columns(2)
 col1.metric("📦 Biaya Produksi", f"Rp {biaya_total:,.0f}")
 col2.metric("⚙️ Biaya Operasional (30%)", f"Rp {biaya_operasional:,.0f}")
+
+col1, col2 = st.columns(2)
+col1.metric("👷 Biaya Tenaga Kerja Harian", f"Rp {biaya_tenaga_kerja:,.0f}")
+col2.metric("💼 Cadangan Operasional (10%)", f"Rp {cadangan_operasional:,.0f}")
 
 st.metric("🧾 Total Biaya + Pajak", f"Rp {biaya_setelah_pajak:,.0f}")
 
@@ -163,16 +178,31 @@ col3.metric("📈 Laba Perusahaan", f"Rp {laba_perusahaan:,.0f}")
 
 st.metric("🔁 Margin Aktual", f"{margin_aktual:.2f}%")
 
+# Tambahan: Tampilkan Target Produksi
+st.metric("🎯 Target Produk Retort yang Harus Diproses", f"{int(target_produk_retort):,} pcs")
+
 # ----------------------------
 # PERBANDINGAN
 # ----------------------------
 st.markdown("### 📊 Ringkasan Perbandingan Harga")
 st.write(f"- **Biaya Produksi Asli**: Rp {biaya_total:,.0f}")
-st.write(f"- **+ Biaya Operasional (30%)**: Rp {biaya_total_final:,.0f}")
-st.write(f"- **+ Pajak 0.5%**: Rp {biaya_setelah_pajak:,.0f}")
+st.write(f"- **+ Biaya Operasional (30%)**: Rp {biaya_operasional:,.0f}")
+st.write(f"- **+ Biaya Tenaga Kerja**: Rp {biaya_tenaga_kerja:,.0f}")
+st.write(f"- **+ Cadangan Operasional (10%)**: Rp {cadangan_operasional:,.0f}")
+st.write(f"- **Total Biaya + Pajak (0.5%)**: Rp {biaya_setelah_pajak:,.0f}")
 st.write(f"- **Harga Jual per pcs (dengan target profit {profit_persen}%)**: Rp {harga_jual_per_pcs:,.0f}")
 st.write(f"- **Margin aktual**: {margin_aktual:.2f}%")
 
+# ----------------------------
+# GRAFIK VISUAL
+# ----------------------------
+st.markdown("### 📉 Grafik Komponen Biaya")
+data_chart = {
+    "Komponen": ["Produksi", "Operasional", "Cadangan", "Tenaga Kerja", "Pajak"],
+    "Biaya (Rp)": [biaya_total, biaya_operasional, cadangan_operasional, biaya_tenaga_kerja, pajak],
+}
+df_chart = pd.DataFrame(data_chart)
+st.bar_chart(df_chart.set_index("Komponen"))
 
 # ----------------------------
 # EKSPOR CSV
