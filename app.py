@@ -92,7 +92,7 @@ jumlah_kemasan = st.sidebar.number_input("Jumlah Produk Diproses", min_value=15,
 biaya_sewa_bulanan = st.sidebar.number_input("Biaya Sewa per Bulan", min_value=0, value=1000000)
 periode_sewa_bulan = st.sidebar.slider("Periode Pembagian Biaya (bulan)", 1, 24, 12)
 
-profit_persen = st.sidebar.slider("🧮 Target Profit Perusahaan (%)", min_value=1, max_value=150, value=63)
+profit_persen = st.sidebar.slider("🧮 Target Profit Perusahaan (%)", min_value=1, max_value=150, value=15)
 
 # ----------------------------
 # PERHITUNGAN BIAYA
@@ -133,10 +133,16 @@ margin_aktual = (profit_bersih / biaya_setelah_pajak) * 100
 # Target retort realistis
 harga_per_proses = harga_jual_per_pcs * jumlah_kemasan
 
-retort_per_hari = int((biaya_total_final * 1.2) / harga_per_proses)
+retort_per_hari = int((biaya_total_final * 1.1) / harga_per_proses)
 retort_per_minggu = retort_per_hari * 7
 retort_per_bulan = retort_per_hari * 30
 retort_per_3bulan = retort_per_bulan * 3
+
+st.markdown("### 🎯 Target Proses Retort")
+st.write(f"- Per Hari: {retort_per_hari} proses")
+st.write(f"- Per Minggu: {retort_per_minggu} proses")
+st.write(f"- Per Bulan: {retort_per_bulan} proses")
+st.write(f"- Per 3 Bulan: {retort_per_3bulan} proses")
 
 # ----------------------------
 # OUTPUT
@@ -159,12 +165,6 @@ col2.metric("🧮 Harga Jual per Pcs", f"Rp {harga_jual_per_pcs:,.0f}")
 col3.metric("📈 Laba Perusahaan", f"Rp {laba_perusahaan:,.0f}")
 
 st.metric("📊 Margin Aktual", f"{margin_aktual:.2f}%")
-
-st.markdown("### 🎯 Target Proses Retort")
-st.write(f"- Per Hari: {retort_per_hari} proses")
-st.write(f"- Per Minggu: {retort_per_minggu} proses")
-st.write(f"- Per Bulan: {retort_per_bulan} proses")
-st.write(f"- Per 3 Bulan: {retort_per_3bulan} proses")
 
 st.markdown("### 📍 Profitabilitas")
 st.write(f"- 💵 Profit Kotor: Rp {profit_kotor:,.0f}")
