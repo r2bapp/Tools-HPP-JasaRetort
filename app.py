@@ -171,66 +171,9 @@ col3.metric("📈 Laba Perusahaan", f"Rp {laba_perusahaan:,.0f}")
 
 st.metric("📊 Margin Aktual", f"{margin_aktual:.2f}%")
 
-st.markdown("### 🎯 Target Proses Retort")
-# Aturan warna: jika target harian terlalu tinggi, beri warna merah
-if retort_per_hari <= 4:
-    warna = "green"
-    keterangan = "Target realistis 👍"
-else:
-    warna = "red"
-    keterangan = "Target terlalu tinggi ⚠️"
-
-# Tampilkan target per hari dengan warna
-st.markdown(f"<span style='color:{warna}; font-size:18px;'>🔸 Per Hari: <b>{retort_per_hari}</b> proses – {keterangan}</span>", unsafe_allow_html=True)
-
-# Sisanya bisa tetap standar
-st.write(f"- Per Minggu: {retort_per_minggu} proses")
-st.write(f"- Per Bulan: {retort_per_bulan} proses")
-st.write(f"- Per 3 Bulan: {retort_per_3bulan} proses")
-
 st.markdown("### 📍 Profitabilitas")
 st.write(f"- 💵 Profit Kotor: Rp {profit_kotor:,.0f}")
 st.write(f"- 💼 Profit Bersih: Rp {profit_bersih:,.0f}")
-
-# Insight Otomatis
-st.markdown("### 🤖 Insight Otomatis Berbasis Data")
-
-# 1. Margin lebih kecil dari target
-if margin_aktual < profit_persen:
-    st.warning("⚠️ Margin lebih kecil dari target profit. Pertimbangkan untuk menaikkan harga jual atau menurunkan biaya produksi.")
-
-# 2. Biaya operasional terlalu tinggi (lebih dari 35% dari total biaya)
-if biaya_operasional > biaya_total * 0.35:
-    st.warning("⚠️ Biaya operasional melebihi 35% dari total biaya. Evaluasi penggunaan listrik, gas, dan air untuk efisiensi.")
-
-# 3. Harga jual per pcs tinggi → Validasi dengan pasar
-if harga_jual_per_pcs > 10000:
-    st.info("💡 Harga jual per pcs cukup tinggi. Pastikan segmen pasar mampu menerima harga ini.")
-
-# 4. Semua aman → indikator sehat
-if (
-    margin_aktual >= profit_persen and
-    biaya_operasional <= biaya_total * 0.35 and
-    harga_jual_per_pcs <= 10000
-):
-    st.success("✅ Biaya dan margin terlihat sehat untuk model bisnis saat ini.")
-
-# Perbandingan Margin Aktual vs Ideal
-st.markdown("### 📊 Perbandingan Margin Aktual vs Target")
-
-# Hitung selisih margin
-selisih_margin = margin_aktual - profit_persen
-selisih_persen = (selisih_margin / profit_persen) * 100 if profit_persen != 0 else 0
-
-# Tampilkan nilai margin
-st.write(f"- Target Margin: {profit_persen:.2f}%")
-st.write(f"- Margin Aktual: {margin_aktual:.2f}%")
-
-# Interpretasi visual
-if selisih_margin >= 0:
-    st.success(f"✅ Margin aktual lebih tinggi dari target sebesar {selisih_persen:.2f}%")
-else:
-    st.error(f"❌ Margin aktual lebih rendah dari target sebesar {abs(selisih_persen):.2f}%")
 
 # ----------------------------
 # PERBANDINGAN
