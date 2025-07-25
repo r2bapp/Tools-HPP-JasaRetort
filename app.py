@@ -155,6 +155,11 @@ margin_aktual = (laba_perusahaan / biaya_setelah_pajak) * 100
 # Hitung Target Jumlah Produk yang Harus Diproses
 target_produk_retort = harga_jual_total // harga_jual_per_pcs
 
+# Hitung Target Mingguan, Bulanan, 3 Bulanan
+target_mingguan = int(target_produk_retort)
+target_bulanan = target_mingguan * 4
+target_3_bulanan = target_bulanan * 3
+
 # ----------------------------
 # OUTPUT TAMPILAN
 # ----------------------------
@@ -179,7 +184,9 @@ col3.metric("📈 Laba Perusahaan", f"Rp {laba_perusahaan:,.0f}")
 st.metric("🔁 Margin Aktual", f"{margin_aktual:.2f}%")
 
 # Tambahan: Tampilkan Target Produksi
-st.metric("🎯 Target Produk Retort yang Harus Diproses", f"{int(target_produk_retort):,} pcs")
+st.metric("🎯 Target Mingguan", f"{target_mingguan:,} pcs")
+st.metric("📆 Target Bulanan", f"{target_bulanan:,} pcs")
+st.metric("📅 Target 3 Bulan", f"{target_3_bulanan:,} pcs")
 
 # ----------------------------
 # PERBANDINGAN
@@ -205,61 +212,86 @@ df_chart = pd.DataFrame(data_chart)
 st.bar_chart(df_chart.set_index("Komponen"))
 
 # ----------------------------
-# EKSPOR CSV
+# SARAN OTOMATIS BERDASARKAN DATA
 # ----------------------------
-if st.button("💾 Simpan CSV"):
-    data = pd.DataFrame({
-        "Ukuran Kemasan": [ukuran_kemasan],
-        "Harga Kemasan": [harga_kemasan],
-        "Jumlah Produk": [jumlah_kemasan],
-        "Total Biaya": [biaya_total],
-        "Pajak": [pajak],
-        "HPP per pcs": [hpp_per_pcs],
-        "Harga Jual per pcs": [harga_jual_per_pcs],
-        "Laba Perusahaan": [laba_perusahaan]
-    })
-    filename = f"data_hpp_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
-    data.to_csv(filename, index=False)
-    st.success(f"✅ Disimpan sebagai {filename}")
+st.markdown("### 🧠 Saran Otomatis")
+saran = ""
+
+if margin_aktual < 10:
+    saran = "Margin sangat rendah. Pertimbangkan menaikkan harga jual atau menekan biaya."
+elif 10 <= margin_aktual <= 20:
+    saran = "Margin cukup, tetapi masih bisa dioptimalkan. Evaluasi efisiensi proses."
+else:
+    saran = "Margin sehat. Model usaha terlihat menguntungkan."
+
+if harga_jual_per_pcs < 3000:
+    saran += "\nHarga jual per pcs sangat rendah, pastikan tidak di bawah standar pasar."
+elif harga_jual_per_pcs > 10000:
+    saran += "\nHarga jual cukup tinggi, pastikan sesuai dengan value yang diterima pelanggan."
+
+st.info(saran)
 
 # ----------------------------
-# EKSPOR PDF
+# EKSPOR DATA (PDF/CSV)
 # ----------------------------
-if st.button("📄 Export PDF"):
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_font("Arial", 'B', 16)
-    pdf.set_text_color(0, 31, 63)
-    pdf.cell(200, 10, "Laporan HPP Jasa Retort", ln=True, align='C')
-    pdf.set_font("Arial", '', 12)
-    pdf.set_text_color(0, 0, 0)
-    pdf.ln(10)
-    tanggal = datetime.datetime.now().strftime('%d-%m-%Y %H:%M')
-    pdf.cell(200, 10, f"Tanggal Input: {tanggal}", ln=True)
-    pdf.cell(200, 10, f"Jenis Kemasan: {jenis_kemasan}", ln=True)
-    pdf.cell(200, 10, f"Ukuran Kemasan: {ukuran_kemasan}", ln=True)
-    pdf.cell(200, 10, f"Harga Kemasan per pcs: Rp {harga_kemasan:,}", ln=True)
-    pdf.cell(200, 10, f"Jumlah Produk Diproses: {jumlah_kemasan} pcs", ln=True)
-    pdf.cell(200, 10, f"Biaya Listrik: Rp {biaya_listrik:,.0f}", ln=True)
-    pdf.cell(200, 10, f"Biaya Gas: Rp {harga_gas_per_proses:,.0f}", ln=True)
-    pdf.cell(200, 10, f"Biaya Air: Rp {harga_air_per_proses:,.0f}", ln=True)
-    pdf.cell(200, 10, f"Biaya Sewa: Rp {biaya_sewa_per_proses:,.0f}", ln=True)
-    pdf.cell(200, 10, f"Total Biaya: Rp {biaya_total:,.0f}", ln=True)
-    pdf.cell(200, 10, f"Pajak (0.5%): Rp {pajak:,.0f}", ln=True)
-    pdf.cell(200, 10, f"Laba Perusahaan ({profit_persen}%): Rp {laba_perusahaan:,.0f}", ln=True)
-    pdf.cell(200, 10, f"Harga Jual Total: Rp {harga_jual_total:,.0f}", ln=True)
-    pdf.cell(200, 10, f"Harga Jual per pcs: Rp {harga_jual_per_pcs:,.0f}", ln=True)
 
-    pdf_bytes = pdf.output(dest='S').encode('latin1')
-    buffer = io.BytesIO(pdf_bytes)
-    buffer.seek(0)
+import io
+import csv
+from fpdf import FPDF
 
-    st.download_button(
-        label="📄 Download PDF",
-        data=buffer,
-        file_name=f"Laporan_HPP_{tanggal}.pdf",
-        mime="application/pdf"
-    )
+st.markdown("### 📤 Ekspor Laporan")
+
+# CSV
+csv_buffer = io.StringIO()
+csv_writer = csv.writer(csv_buffer)
+csv_writer.writerow(["Komponen", "Nilai"])
+csv_writer.writerow(["Biaya Produksi", biaya_total])
+csv_writer.writerow(["Biaya Operasional", biaya_operasional])
+csv_writer.writerow(["Biaya Tenaga Kerja", biaya_tenaga_kerja])
+csv_writer.writerow(["Cadangan Operasional", cadangan_operasional])
+csv_writer.writerow(["Pajak", pajak])
+csv_writer.writerow(["Total Biaya + Pajak", biaya_setelah_pajak])
+csv_writer.writerow(["Harga Jual Total", harga_jual_total])
+csv_writer.writerow(["Harga Jual per Pcs", harga_jual_per_pcs])
+csv_writer.writerow(["Laba Perusahaan", laba_perusahaan])
+csv_writer.writerow(["Margin Aktual", margin_aktual])
+csv_writer.writerow(["Target Mingguan", target_mingguan])
+csv_writer.writerow(["Target Bulanan", target_bulanan])
+csv_writer.writerow(["Target 3 Bulan", target_3_bulanan])
+
+st.download_button("⬇️ Download CSV", csv_buffer.getvalue(), file_name="laporan_hpp.csv", mime="text/csv")
+
+# PDF
+pdf = FPDF()
+pdf.add_page()
+pdf.set_font("Arial", size=12)
+pdf.cell(200, 10, txt="Laporan HPP Retort", ln=True, align='C')
+pdf.ln(10)
+
+data_pdf = [
+    ("Biaya Produksi", biaya_total),
+    ("Biaya Operasional", biaya_operasional),
+    ("Biaya Tenaga Kerja", biaya_tenaga_kerja),
+    ("Cadangan Operasional", cadangan_operasional),
+    ("Pajak", pajak),
+    ("Total Biaya + Pajak", biaya_setelah_pajak),
+    ("Harga Jual Total", harga_jual_total),
+    ("Harga Jual per Pcs", harga_jual_per_pcs),
+    ("Laba Perusahaan", laba_perusahaan),
+    ("Margin Aktual", f"{margin_aktual:.2f}%"),
+    ("Target Mingguan", target_mingguan),
+    ("Target Bulanan", target_bulanan),
+    ("Target 3 Bulan", target_3_bulanan),
+]
+
+for label, value in data_pdf:
+    pdf.cell(200, 10, txt=f"{label}: Rp {value:,}" if isinstance(value, (int, float)) else f"{label}: {value}", ln=True)
+
+pdf_output = io.BytesIO()
+pdf.output(pdf_output)
+pdf_output.seek(0)
+st.download_button("⬇️ Download PDF", pdf_output, file_name="laporan_hpp.pdf", mime="application/pdf")
+
 
 # ----------------------------
 # RESET
