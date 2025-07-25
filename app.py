@@ -241,7 +241,7 @@ Saran:
 {saran}
 """)
     pdf.output("laporan_hpp.pdf")
-    st.success("✅ PDF berhasil diekspor.") st.success("✅ PDF berhasil diekspor.")
+    st.success("✅ PDF berhasil diekspor.")
 
 # ----------------------------
 # RESET
