@@ -244,6 +244,18 @@ if st.button("🖨️ Ekspor PDF"):
 
     pdf.output("laporan_hpp.pdf")
     st.success("✅ PDF berhasil diekspor.")
+    
+    # Simpan dan download
+    pdf_bytes = pdf.output(dest='S').encode('latin1')  # OK untuk teks non-Unicode
+    buffer = io.BytesIO(pdf_bytes)
+    buffer.seek(0)
+
+    st.download_button(
+         label="📄 Download PDF",
+         data=buffer,
+         file_name=f"Laporan_HPP_{tanggal}.pdf",
+         mime="application/pdf"
+)
 
 # ----------------------------
 # RESET
