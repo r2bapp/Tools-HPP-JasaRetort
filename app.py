@@ -155,6 +155,33 @@ margin_aktual = (laba_perusahaan / biaya_setelah_pajak) * 100
 # Hitung Target Jumlah Produk yang Harus Diproses
 target_produk_retort = harga_jual_total // harga_jual_per_pcs
 
+    produk_per_hari = int((biaya_total_final / harga_jual_per_pcs) / 30)
+    produk_per_minggu = produk_per_hari * 7
+    produk_per_bulan = produk_per_hari * 30
+    produk_3_bulan = produk_per_bulan * 3
+
+    if margin_aktual < 30:
+        saran = "⚠️ Margin terlalu rendah. Pertimbangkan menaikkan harga jual atau mengurangi biaya operasional."
+    elif margin_aktual > 80:
+        saran = "✅ Margin tinggi. Anda bisa mempertimbangkan promosi atau diskon untuk meningkatkan volume penjualan."
+    else:
+        saran = "👍 Margin cukup sehat. Pertahankan efisiensi biaya dan stabilitas harga."
+
+    st.header("📊 Hasil Perhitungan")
+    st.metric("HPP per pcs", f"Rp {hpp_per_pcs:,.0f}")
+    st.metric("Margin Aktual", f"{margin_aktual:.2f}%")
+    st.metric("Total Biaya Final", f"Rp {biaya_total_final:,.0f}")
+    st.metric("Laba Bersih Total", f"Rp {laba_bersih_total:,.0f}")
+
+    st.subheader("🎯 Target Produksi Harian & Bulanan")
+    st.markdown(f"- Produk per Hari: **{produk_per_hari} pcs**")
+    st.markdown(f"- Produk per Minggu: **{produk_per_minggu} pcs**")
+    st.markdown(f"- Produk per Bulan: **{produk_per_bulan} pcs**")
+    st.markdown(f"- Produk 3 Bulan: **{produk_3_bulan} pcs**")
+
+    st.subheader("💡 Insight Otomatis")
+    st.info(saran)
+
 # ----------------------------
 # OUTPUT TAMPILAN
 # ----------------------------
@@ -222,33 +249,47 @@ if st.button("💾 Simpan CSV"):
     data.to_csv(filename, index=False)
     st.success(f"✅ Disimpan sebagai {filename}")
 
-# ----------------------------
-# EKSPOR PDF
-# ----------------------------
-if st.button("📄 Export PDF"):
+ # ----------------------------
+    # EXPORT PDF
+    # ----------------------------
+    tanggal = datetime.date.today()
+
     pdf = FPDF()
     pdf.add_page()
-    pdf.set_font("Arial", 'B', 16)
-    pdf.set_text_color(0, 31, 63)
-    pdf.cell(200, 10, "Laporan HPP Jasa Retort", ln=True, align='C')
-    pdf.set_font("Arial", '', 12)
-    pdf.set_text_color(0, 0, 0)
+    pdf.add_font('DejaVu', '', fname='DejaVuSans.ttf', uni=True)
+    pdf.set_font("DejaVu", size=12)
+
+    pdf.cell(200, 10, txt="Laporan HPP Jasa Retort", ln=True, align="C")
     pdf.ln(10)
-    tanggal = datetime.datetime.now().strftime('%d-%m-%Y %H:%M')
-    pdf.cell(200, 10, f"Tanggal Input: {tanggal}", ln=True)
-    pdf.cell(200, 10, f"Jenis Kemasan: {jenis_kemasan}", ln=True)
-    pdf.cell(200, 10, f"Ukuran Kemasan: {ukuran_kemasan}", ln=True)
-    pdf.cell(200, 10, f"Harga Kemasan per pcs: Rp {harga_kemasan:,}", ln=True)
-    pdf.cell(200, 10, f"Jumlah Produk Diproses: {jumlah_kemasan} pcs", ln=True)
-    pdf.cell(200, 10, f"Biaya Listrik: Rp {biaya_listrik:,.0f}", ln=True)
-    pdf.cell(200, 10, f"Biaya Gas: Rp {harga_gas_per_proses:,.0f}", ln=True)
-    pdf.cell(200, 10, f"Biaya Air: Rp {harga_air_per_proses:,.0f}", ln=True)
-    pdf.cell(200, 10, f"Biaya Sewa: Rp {biaya_sewa_per_proses:,.0f}", ln=True)
-    pdf.cell(200, 10, f"Total Biaya: Rp {biaya_total:,.0f}", ln=True)
-    pdf.cell(200, 10, f"Pajak (0.5%): Rp {pajak:,.0f}", ln=True)
-    pdf.cell(200, 10, f"Laba Perusahaan ({profit_persen}%): Rp {laba_perusahaan:,.0f}", ln=True)
-    pdf.cell(200, 10, f"Harga Jual Total: Rp {harga_jual_total:,.0f}", ln=True)
-    pdf.cell(200, 10, f"Harga Jual per pcs: Rp {harga_jual_per_pcs:,.0f}", ln=True)
+
+    pdf.multi_cell(0, 10, txt=f"""
+Tanggal: {tanggal}
+Jenis Kemasan: {jenis_kemasan}
+Ukuran Kemasan: {ukuran_kemasan}
+
+Biaya per Batch:
+- Biaya Kemasan: Rp {biaya_kemasan:,.0f} x {jumlah_produk} pcs = Rp {biaya_kemasan * jumlah_produk:,.0f}
+- Gas: Rp {biaya_gas:,.0f}
+- Listrik: Rp {biaya_listrik:,.0f}
+- Air: Rp {biaya_air:,.0f}
+- Tenaga Kerja: Rp {biaya_tenaga_kerja:,.0f}
+- Pajak (0.5%): Rp {pajak:,.0f}
+
+Total Biaya Final: Rp {biaya_total_final:,.0f}
+HPP per pcs: Rp {hpp_per_pcs:,.0f}
+Harga Jual: Rp {harga_jual_per_pcs:,.0f}
+Margin Aktual: {margin_aktual:.2f}%
+Laba Bersih: Rp {laba_bersih_total:,.0f}
+
+Target Produksi:
+- per Hari: {produk_per_hari} pcs
+- per Minggu: {produk_per_minggu} pcs
+- per Bulan: {produk_per_bulan} pcs
+- per 3 Bulan: {produk_3_bulan} pcs
+
+Saran:
+{saran}
+""")
 
     buffer = io.BytesIO()
     pdf.output(buffer)  # langsung tulis ke BytesIO tanpa encode manual
