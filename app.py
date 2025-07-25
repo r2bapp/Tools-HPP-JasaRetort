@@ -292,6 +292,12 @@ pdf.output(pdf_output)
 pdf_output.seek(0)
 st.download_button("⬇️ Download PDF", pdf_output, file_name="laporan_hpp.pdf", mime="application/pdf")
 
+  st.download_button(
+        label="📄 Download PDF",
+        data=buffer,
+        file_name=f"Laporan_HPP_{tanggal}.pdf",
+        mime="application/pdf"
+    )
 
 # ----------------------------
 # RESET
